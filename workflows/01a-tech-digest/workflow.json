@@ -1,0 +1,1993 @@
+{
+  "updatedAt": "2026-04-20T09:32:51.612Z",
+  "createdAt": "2026-04-17T11:12:13.861Z",
+  "id": "K6vwgGzZp30lg39w",
+  "name": "01a - Tech Digest",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        160
+      ],
+      "id": "b70f6fe1-3407-45dc-b4b0-08db272e25a5",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://openai.com/news/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -128
+      ],
+      "id": "0a790278-81ee-471f-bf44-370c89f43e9f",
+      "name": "OpenAI News",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://huggingface.co/blog/feed.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        64
+      ],
+      "id": "4b4dbec5-a51e-4050-b26b-a28799a8b8ee",
+      "name": "HuggingFace Blog",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://deepmind.google/blog/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        -128
+      ],
+      "id": "ed3814e7-3cd8-473e-a363-b84a993a95c2",
+      "name": "Google DeepMind",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_news.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        -128
+      ],
+      "id": "dd09fd52-1e5a-4f3a-8059-c8be9d963041",
+      "name": "Anthropic News",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/nB4fWA6y4jtdd64l.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        64
+      ],
+      "id": "d7e42e96-e1e5-45c2-8598-d7a8cd8f0628",
+      "name": "r/anthropic",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_changelog_claude_code.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        256
+      ],
+      "id": "eecabe69-a952-491b-b760-fdd1d10045bb",
+      "name": "Claude Code Changelog",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/WEbLkuqtbN4nBIjk.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        256
+      ],
+      "id": "e649b68c-bb63-4e12-914c-5be7a5eddf0f",
+      "name": "r/mcp",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/UuYZ341A3i7O0a4a.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        448
+      ],
+      "id": "87d68a2e-6e1c-4fe9-94b2-5fa8a80fcef7",
+      "name": "r/opencodeCLI",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/Ld4IXg6S0mp2JkL5.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        256
+      ],
+      "id": "1fbb567e-204b-41e2-8f37-e9a06a806db2",
+      "name": "r/openclaw",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/93IGoZeEVYfNEOCU.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        -128
+      ],
+      "id": "28b29d46-279c-447d-9dbe-9ca95443c6e0",
+      "name": "r/Z.ai (GLM)",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_xainews.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        64
+      ],
+      "id": "1395263a-9c92-4f71-bb09-cda10957abef",
+      "name": "xAI News (Grok)",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        448
+      ],
+      "id": "d93d3f5f-1bca-4efb-ae88-44baef2072c0",
+      "name": "TechCrunch AI",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://blog.n8n.io/rss/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        256
+      ],
+      "id": "16ec549d-f868-457e-bf95-aa18e58f137d",
+      "name": "n8n Blog",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1312,
+        -192
+      ],
+      "id": "bb7685a4-4e07-436e-9943-5ee630f264e4",
+      "name": "Merge 3"
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        -128
+      ],
+      "id": "096cb642-6770-4a41-b8ab-f95ba7abe38b",
+      "name": "Merge 1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        256
+      ],
+      "id": "f323c052-73e4-4783-b471-f0d65e7ea729",
+      "name": "Merge 2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "af94450b-75bc-4a10-8418-26b897919326",
+              "leftValue": "={{ $json.pubDate || $json.isoDate || $json.published || $json.created }}",
+              "rightValue": "={{ $now.minus({ hours: 24 }).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1312,
+        288
+      ],
+      "id": "d47eff77-bb9c-4ebe-b826-a6551fb33943",
+      "name": "Filter (< 24h)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const seen = new Set();\nconst seenTitles = new Set();\nconst out = [];\n\nfor (const item of $input.all()) {\n  const url = item.json.link || item.json.url || item.json.guid || item.json.id;\n  \n  // Normalise le titre pour dedup sémantique\n  const rawTitle = item.json.title || '';\n  const normalizedTitle = rawTitle\n    .toLowerCase()\n    .replace(/[^\\w\\s]/g, '')    // enlève ponctuation\n    .replace(/\\s+/g, ' ')        // normalise espaces\n    .trim()\n    .substring(0, 60);            // prend les 60 premiers chars (le vrai signal)\n  \n  // Skip si URL OU titre-normalisé déjà vu\n  if (seen.has(url) || seenTitles.has(normalizedTitle)) continue;\n  \n  seen.add(url);\n  seenTitles.add(normalizedTitle);\n  out.push(item);\n}\n\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        48
+      ],
+      "id": "5b7cda53-d791-453d-a7b4-a51fc9525577",
+      "name": "Code in JavaScript (Dedup)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu es l'agent de veille tech d'Upscale. Tu reçois des articles bruts RSS IA/tech des dernières 24h.\n\nRègles :\n- Si un événement majeur est arrivé (lancement de modèle, acquisition, faille de sécurité, feature révolutionnaire), commence par : 🚨 BREAKING\n- Max 8 items, classés par importance décroissante\n- Regroupe par catégorie avec emoji + gras\n- Pour chaque item : titre court (max 12 mots), résumé en 2 phrases MAX, lien\n- Ignore : drama Reddit sans impact, posts <100 upvotes, news génériques \"AI is growing\"\n- Si vraiment rien de pertinent : \"RAS aujourd'hui.\" et stop\n- Pas de préambule, pas de conclusion, pas de \"voici votre digest\"\n\nFormat HTML obligatoire :\n<b>🚨 BREAKING</b> (si applicable)\n<b>🤖 Agents & Automation</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🧠 Modèles & Research</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🏢 Business & Funding</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🛠 Outils & Open Source</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\nArticles :\n{{ $json.articles_text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1712,
+        112
+      ],
+      "id": "59b27757-8025-41f6-a964-055c2fc3fdbf",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.clean_text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        96
+      ],
+      "id": "dc8ba884-a245-40bb-9027-2593bbb9a065",
+      "name": "Send a text message",
+      "webhookId": "30adb800-88fa-40dc-ae28-056b89dff691",
+      "credentials": {
+        "telegramApi": {
+          "id": "JBuOyWVE5FZm7754",
+          "name": "t.me/kwce_tech_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://github.com/ollama/ollama/releases.atom",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        448
+      ],
+      "id": "bbaf9b97-5d19-4703-82f7-712265ee7f96",
+      "name": "Ollama Releases",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $input.first().json.output || $input.first().json.message?.content || $input.first().json.text || '';\n\n// Supprime le préambule\ntext = text.replace(/^(.*?)(?=\\n[•🚨<])/s, '');\n\n// Supprime la conclusion\ntext = text.replace(/\\n*(Let me know|Would you like|This message was|Feel free).*$/si, '');\n\n// Convertit Markdown en HTML\ntext = text.replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>');\ntext = text.replace(/\\*(.*?)\\*/g, '<i>$1</i>');\ntext = text.replace(/\\[(.*?)\\]\\((.*?)\\)/g, '<a href=\"$2\">$1</a>');\n\n// Limite à 4096 chars max (limite Telegram)\nif (text.length > 4000) {\n  text = text.substring(0, 3950) + '\\n\\n... (tronqué)';\n}\n\nreturn [{ json: { clean_text: `💻 <b><a href=\"linktr.ee/kwce\">kwce</a> TECH DIGEST</b>\\n\\n${text}\\n\\n━━━━━━━━━━━━━━━\\nPropulsé par <a href=\"linktr.ee/kwce\">kwce</a>` } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        96
+      ],
+      "id": "77d13470-5882-437c-a1be-2b069e52cad2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        -80
+      ],
+      "id": "e95c4ce6-e333-489a-a3dd-0be48ff9a651",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "YOUR_GROQ_CREDENTIAL_ID",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const articles = $input.all().map(item => {\n  const title = item.json.title || 'Sans titre';\n  const link = item.json.link || item.json.url || '';\n  const desc = (item.json.contentSnippet || item.json.description || '').substring(0, 250);\n  return `- ${title}\\n  ${desc}\\n  ${link}`;\n}).join('\\n\\n');\n\nreturn [{ json: { articles_text: articles } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        528
+      ],
+      "id": "51a0c3bb-d401-43eb-b8a0-8fda91686e4a",
+      "name": "Code in JavaScript (Fusion)"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/B8aQg9ZfXK1s2GIc.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        448
+      ],
+      "id": "73528739-0744-4309-9742-52ab49acb0c7",
+      "name": "The Batch (DeepLearning.AI)",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        64
+      ],
+      "id": "282ce9ce-06ae-4ccd-a422-43bd70ca7983",
+      "name": "MIT Technology Review AI",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama-3.3-70b-versatile",
+          "mode": "list",
+          "cachedResultName": "llama-3.3-70b-versatile"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        304
+      ],
+      "id": "d155dc74-bce3-489e-ab0a-e96459a8b2c3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_GROQ_OPENAI_COMPAT_CREDENTIAL_ID",
+          "name": "groq api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=⚠️ Source RSS down : {{ $json.error.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -320
+      ],
+      "id": "52c73d7f-1a69-4f6f-b548-e724a2e8adef",
+      "name": "Send a text message1",
+      "webhookId": "c1e504a8-8c97-4dba-b5a7-220308be3088",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_DEBUG_BOT_CREDENTIAL_ID",
+          "name": "t.me/kwcedebugbot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "The Batch (DeepLearning.AI)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "r/opencodeCLI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TechCrunch AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ollama Releases",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "n8n Blog",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "r/openclaw",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "r/mcp",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Claude Code Changelog",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "OpenAI News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Anthropic News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "r/Z.ai (GLM)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google DeepMind",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "xAI News (Grok)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HuggingFace Blog",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "r/anthropic",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MIT Technology Review AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HuggingFace Blog": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 6
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google DeepMind": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "n8n Blog": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch AI": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 6
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI News": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic News": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "r/Z.ai (GLM)": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "r/anthropic": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 5
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "xAI News (Grok)": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 7
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Code Changelog": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "r/mcp": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "r/openclaw": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "r/opencodeCLI": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 5
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge 1": {
+      "main": [
+        [
+          {
+            "node": "Merge 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge 2": {
+      "main": [
+        [
+          {
+            "node": "Merge 3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge 3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (Dedup)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript (Dedup)": {
+      "main": [
+        [
+          {
+            "node": "Filter (< 24h)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter (< 24h)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (Fusion)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Releases": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 7
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Code in JavaScript (Fusion)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "The Batch (DeepLearning.AI)": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 4
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MIT Technology Review AI": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 4
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "8mwtMCWk0T2g0mSw",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "40d189e4-bca5-452a-aa4b-9a7fb67a7a15",
+  "activeVersionId": "40d189e4-bca5-452a-aa4b-9a7fb67a7a15",
+  "triggerCount": 1,
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-04-19T13:03:58.005Z",
+    "createdAt": "2026-04-19T13:03:57.073Z",
+    "versionId": "40d189e4-bca5-452a-aa4b-9a7fb67a7a15",
+    "workflowId": "K6vwgGzZp30lg39w",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 6
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          32,
+          160
+        ],
+        "id": "b70f6fe1-3407-45dc-b4b0-08db272e25a5",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "url": "https://openai.com/news/rss.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          -128
+        ],
+        "id": "0a790278-81ee-471f-bf44-370c89f43e9f",
+        "name": "OpenAI News",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://huggingface.co/blog/feed.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          64
+        ],
+        "id": "4b4dbec5-a51e-4050-b26b-a28799a8b8ee",
+        "name": "HuggingFace Blog",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://deepmind.google/blog/rss.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          -128
+        ],
+        "id": "ed3814e7-3cd8-473e-a363-b84a993a95c2",
+        "name": "Google DeepMind",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_news.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          -128
+        ],
+        "id": "dd09fd52-1e5a-4f3a-8059-c8be9d963041",
+        "name": "Anthropic News",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/nB4fWA6y4jtdd64l.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          64
+        ],
+        "id": "d7e42e96-e1e5-45c2-8598-d7a8cd8f0628",
+        "name": "r/anthropic",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_changelog_claude_code.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          256
+        ],
+        "id": "eecabe69-a952-491b-b760-fdd1d10045bb",
+        "name": "Claude Code Changelog",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/WEbLkuqtbN4nBIjk.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          256
+        ],
+        "id": "e649b68c-bb63-4e12-914c-5be7a5eddf0f",
+        "name": "r/mcp",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/UuYZ341A3i7O0a4a.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          448
+        ],
+        "id": "87d68a2e-6e1c-4fe9-94b2-5fa8a80fcef7",
+        "name": "r/opencodeCLI",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/Ld4IXg6S0mp2JkL5.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          256
+        ],
+        "id": "1fbb567e-204b-41e2-8f37-e9a06a806db2",
+        "name": "r/openclaw",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/93IGoZeEVYfNEOCU.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          -128
+        ],
+        "id": "28b29d46-279c-447d-9dbe-9ca95443c6e0",
+        "name": "r/Z.ai (GLM)",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_xainews.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          64
+        ],
+        "id": "1395263a-9c92-4f71-bb09-cda10957abef",
+        "name": "xAI News (Grok)",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          448
+        ],
+        "id": "d93d3f5f-1bca-4efb-ae88-44baef2072c0",
+        "name": "TechCrunch AI",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://blog.n8n.io/rss/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          256
+        ],
+        "id": "16ec549d-f868-457e-bf95-aa18e58f137d",
+        "name": "n8n Blog",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1312,
+          -192
+        ],
+        "id": "bb7685a4-4e07-436e-9943-5ee630f264e4",
+        "name": "Merge 3"
+      },
+      {
+        "parameters": {
+          "numberInputs": 8
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1072,
+          -128
+        ],
+        "id": "096cb642-6770-4a41-b8ab-f95ba7abe38b",
+        "name": "Merge 1"
+      },
+      {
+        "parameters": {
+          "numberInputs": 8
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1072,
+          256
+        ],
+        "id": "f323c052-73e4-4783-b471-f0d65e7ea729",
+        "name": "Merge 2"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "af94450b-75bc-4a10-8418-26b897919326",
+                "leftValue": "={{ $json.pubDate || $json.isoDate || $json.published || $json.created }}",
+                "rightValue": "={{ $now.minus({ hours: 24 }).toISO() }}",
+                "operator": {
+                  "type": "dateTime",
+                  "operation": "after"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          1312,
+          288
+        ],
+        "id": "d47eff77-bb9c-4ebe-b826-a6551fb33943",
+        "name": "Filter (< 24h)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const seen = new Set();\nconst seenTitles = new Set();\nconst out = [];\n\nfor (const item of $input.all()) {\n  const url = item.json.link || item.json.url || item.json.guid || item.json.id;\n  \n  // Normalise le titre pour dedup sémantique\n  const rawTitle = item.json.title || '';\n  const normalizedTitle = rawTitle\n    .toLowerCase()\n    .replace(/[^\\w\\s]/g, '')    // enlève ponctuation\n    .replace(/\\s+/g, ' ')        // normalise espaces\n    .trim()\n    .substring(0, 60);            // prend les 60 premiers chars (le vrai signal)\n  \n  // Skip si URL OU titre-normalisé déjà vu\n  if (seen.has(url) || seenTitles.has(normalizedTitle)) continue;\n  \n  seen.add(url);\n  seenTitles.add(normalizedTitle);\n  out.push(item);\n}\n\nreturn out;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1312,
+          48
+        ],
+        "id": "5b7cda53-d791-453d-a7b4-a51fc9525577",
+        "name": "Code in JavaScript (Dedup)"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Tu es l'agent de veille tech d'Upscale. Tu reçois des articles bruts RSS IA/tech des dernières 24h.\n\nRègles :\n- Si un événement majeur est arrivé (lancement de modèle, acquisition, faille de sécurité, feature révolutionnaire), commence par : 🚨 BREAKING\n- Max 8 items, classés par importance décroissante\n- Regroupe par catégorie avec emoji + gras\n- Pour chaque item : titre court (max 12 mots), résumé en 2 phrases MAX, lien\n- Ignore : drama Reddit sans impact, posts <100 upvotes, news génériques \"AI is growing\"\n- Si vraiment rien de pertinent : \"RAS aujourd'hui.\" et stop\n- Pas de préambule, pas de conclusion, pas de \"voici votre digest\"\n\nFormat HTML obligatoire :\n<b>🚨 BREAKING</b> (si applicable)\n<b>🤖 Agents & Automation</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🧠 Modèles & Research</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🏢 Business & Funding</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🛠 Outils & Open Source</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\nArticles :\n{{ $json.articles_text }}",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1712,
+          112
+        ],
+        "id": "59b27757-8025-41f6-a964-055c2fc3fdbf",
+        "name": "AI Agent",
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 5000,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "={{ $json.clean_text }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          2256,
+          96
+        ],
+        "id": "dc8ba884-a245-40bb-9027-2593bbb9a065",
+        "name": "Send a text message",
+        "webhookId": "30adb800-88fa-40dc-ae28-056b89dff691",
+        "credentials": {
+          "telegramApi": {
+            "id": "JBuOyWVE5FZm7754",
+            "name": "t.me/kwce_tech_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "url": "https://github.com/ollama/ollama/releases.atom",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          448
+        ],
+        "id": "bbaf9b97-5d19-4703-82f7-712265ee7f96",
+        "name": "Ollama Releases",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "let text = $input.first().json.output || $input.first().json.message?.content || $input.first().json.text || '';\n\n// Supprime le préambule\ntext = text.replace(/^(.*?)(?=\\n[•🚨<])/s, '');\n\n// Supprime la conclusion\ntext = text.replace(/\\n*(Let me know|Would you like|This message was|Feel free).*$/si, '');\n\n// Convertit Markdown en HTML\ntext = text.replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>');\ntext = text.replace(/\\*(.*?)\\*/g, '<i>$1</i>');\ntext = text.replace(/\\[(.*?)\\]\\((.*?)\\)/g, '<a href=\"$2\">$1</a>');\n\n// Limite à 4096 chars max (limite Telegram)\nif (text.length > 4000) {\n  text = text.substring(0, 3950) + '\\n\\n... (tronqué)';\n}\n\nreturn [{ json: { clean_text: `💻 <b><a href=\"linktr.ee/kwce\">kwce</a> TECH DIGEST</b>\\n\\n${text}\\n\\n━━━━━━━━━━━━━━━\\nPropulsé par <a href=\"linktr.ee/kwce\">kwce</a>` } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2064,
+          96
+        ],
+        "id": "77d13470-5882-437c-a1be-2b069e52cad2",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "model": "llama-3.3-70b-versatile",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+        "typeVersion": 1,
+        "position": [
+          1712,
+          -80
+        ],
+        "id": "e95c4ce6-e333-489a-a3dd-0be48ff9a651",
+        "name": "Groq Chat Model",
+        "credentials": {
+          "groqApi": {
+            "id": "YOUR_GROQ_CREDENTIAL_ID",
+            "name": "Groq account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const articles = $input.all().map(item => {\n  const title = item.json.title || 'Sans titre';\n  const link = item.json.link || item.json.url || '';\n  const desc = (item.json.contentSnippet || item.json.description || '').substring(0, 250);\n  return `- ${title}\\n  ${desc}\\n  ${link}`;\n}).join('\\n\\n');\n\nreturn [{ json: { articles_text: articles } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1312,
+          528
+        ],
+        "id": "51a0c3bb-d401-43eb-b8a0-8fda91686e4a",
+        "name": "Code in JavaScript (Fusion)"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/B8aQg9ZfXK1s2GIc.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          448
+        ],
+        "id": "73528739-0744-4309-9742-52ab49acb0c7",
+        "name": "The Batch (DeepLearning.AI)",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          64
+        ],
+        "id": "282ce9ce-06ae-4ccd-a422-43bd70ca7983",
+        "name": "MIT Technology Review AI",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "llama-3.3-70b-versatile",
+            "mode": "list",
+            "cachedResultName": "llama-3.3-70b-versatile"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1712,
+          304
+        ],
+        "id": "d155dc74-bce3-489e-ab0a-e96459a8b2c3",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_GROQ_OPENAI_COMPAT_CREDENTIAL_ID",
+            "name": "groq api"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "=⚠️ Source RSS down : {{ $json.error.message }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          -320
+        ],
+        "id": "52c73d7f-1a69-4f6f-b548-e724a2e8adef",
+        "name": "Send a text message1",
+        "webhookId": "c1e504a8-8c97-4dba-b5a7-220308be3088",
+        "credentials": {
+          "telegramApi": {
+            "id": "YOUR_TELEGRAM_DEBUG_BOT_CREDENTIAL_ID",
+            "name": "t.me/kwcedebugbot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "The Batch (DeepLearning.AI)",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "r/opencodeCLI",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "TechCrunch AI",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Ollama Releases",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "n8n Blog",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "r/openclaw",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "r/mcp",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Claude Code Changelog",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "OpenAI News",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Anthropic News",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "r/Z.ai (GLM)",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Google DeepMind",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "xAI News (Grok)",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "HuggingFace Blog",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "r/anthropic",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "MIT Technology Review AI",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HuggingFace Blog": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 6
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google DeepMind": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 1
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "n8n Blog": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TechCrunch AI": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 6
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI News": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 3
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Anthropic News": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 2
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "r/Z.ai (GLM)": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "r/anthropic": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 5
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "xAI News (Grok)": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 7
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Claude Code Changelog": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 3
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "r/mcp": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 2
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "r/openclaw": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 1
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "r/opencodeCLI": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 5
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge 1": {
+        "main": [
+          [
+            {
+              "node": "Merge 3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge 2": {
+        "main": [
+          [
+            {
+              "node": "Merge 3",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge 3": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript (Dedup)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript (Dedup)": {
+        "main": [
+          [
+            {
+              "node": "Filter (< 24h)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter (< 24h)": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript (Fusion)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ollama Releases": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 7
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send a text message": {
+        "main": [
+          []
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Groq Chat Model": {
+        "ai_languageModel": [
+          []
+        ]
+      },
+      "Code in JavaScript (Fusion)": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "The Batch (DeepLearning.AI)": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 4
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MIT Technology Review AI": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 4
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Version 40d189e4",
+    "description": "",
+    "autosaved": true
+  }
+}

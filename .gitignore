@@ -1,0 +1,27 @@
+# n8n export artefacts
+*.bak
+*.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets (never commit real credentials)
+.env.local
+secrets.json
+credentials.json

@@ -1,0 +1,1943 @@
+{
+  "updatedAt": "2026-04-20T09:33:02.025Z",
+  "createdAt": "2026-04-17T13:17:13.589Z",
+  "id": "bQS6Cxzijz7gbOBo",
+  "name": "01c - Finance Digest",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 4
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        160
+      ],
+      "id": "32f73ac0-ad6a-4ffb-b3a4-9261bb8bb01d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1312,
+        -192
+      ],
+      "id": "feb92095-44a1-4ed1-b129-63bc051c010c",
+      "name": "Merge 3"
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        -128
+      ],
+      "id": "1d371551-b7bb-44cb-8616-3d1b28c29fee",
+      "name": "Merge 1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        256
+      ],
+      "id": "a8fafe6e-05c4-4f66-a1c2-af452ef194f9",
+      "name": "Merge 2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "af94450b-75bc-4a10-8418-26b897919326",
+              "leftValue": "={{ $json.pubDate || $json.isoDate || $json.published || $json.created }}",
+              "rightValue": "={{ $now.minus({ hours: 24 }).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1312,
+        288
+      ],
+      "id": "71110b76-4e3c-4fa3-99fd-62f198dfed58",
+      "name": "Filter (< 24h)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const seen = new Set();\nconst seenTitles = new Set();\nconst out = [];\n\nfor (const item of $input.all()) {\n  const url = item.json.link || item.json.url || item.json.guid || item.json.id;\n  \n  const rawTitle = item.json.title || '';\n  const normalizedTitle = rawTitle\n    .toLowerCase()\n    .replace(/[^\\w\\s]/g, '')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .substring(0, 60);\n  \n  if (seen.has(url) || seenTitles.has(normalizedTitle)) continue;\n  \n  seen.add(url);\n  seenTitles.add(normalizedTitle);\n  out.push(item);\n}\n\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        48
+      ],
+      "id": "b7ad59e0-62f9-4293-b76b-34d136b140db",
+      "name": "Code in JavaScript (Dedup)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu es l'agent de veille finance d'Upscale. Tu reçois des articles bruts RSS forex/macro/commodities des dernières 24h.\n\nRègles :\n- Si un événement majeur (décision FED/ECB/BCE, guerre, sanction, crash marché), commence par : 🚨 BREAKING\n- Max 8 items, classés par importance décroissante\n- Regroupe par catégorie avec emoji + gras\n- Pour chaque item : titre court (max 12 mots), résumé en 2 phrases MAX, lien\n- Ignore : \"Dow Jones up 0.1%\" noise quotidien, articles sponsorisés, prédictions sans fondement\n- Si vraiment rien de pertinent : \"RAS aujourd'hui.\" et stop\n- Pas de préambule, pas de conclusion\n\nFormat HTML obligatoire :\n<b>🚨 BREAKING</b> (si applicable)\n<b>🏛 Banques Centrales</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>💰 Forex & Devises</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🥇 Or & Matières Premières</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>📈 Macro & Marchés</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\nRÉPONDS EXACTEMENT COMME CET EXEMPLE (commence par la catégorie, pas par un item) :\n\n<b>🏛 Banques Centrales</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\n<b>💰 Forex & Devises</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\nMAINTENANT APPLIQUE CE FORMAT À CES ARTICLES :\n{{ $json.articles_text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1712,
+        96
+      ],
+      "id": "2f66c305-183d-4e8e-b100-43a921eec34f",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.clean_text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        96
+      ],
+      "id": "62551f06-53ca-44ef-b9c6-8be7c1f47dea",
+      "name": "Send a text message",
+      "webhookId": "fd181110-09d5-4d2e-a231-6292dc1ea8f1",
+      "credentials": {
+        "telegramApi": {
+          "id": "PcPQUhSi6mw53xJP",
+          "name": "t.me/kwce_finance_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $input.first().json.output || $input.first().json.message?.content || $input.first().json.text || '';\n\ntext = text.replace(/^([\\s\\S]*?)(?=\\n[•🚨<])/, '');\ntext = text.replace(/\\n*(Let me know|Would you like|This message was|Feel free).*$/si, '');\n\ntext = text.replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>');\ntext = text.replace(/\\*(.*?)\\*/g, '<i>$1</i>');\ntext = text.replace(/\\[(.*?)\\]\\((https?:\\/\\/.*?)\\)/g, '<a href=\"$2\">$1</a>');\n\ntext = text.replace(/<(\\/?b)>/gi, '%%B$1B%%');\ntext = text.replace(/<(\\/?i)>/gi, '%%I$1I%%');\ntext = text.replace(/<a href=\"(.*?)\">(.*?)<\\/a>/gi, '%%A$1A$2AA%%');\ntext = text.replace(/[<>]/g, '');\ntext = text.replace(/%%B(\\/?b)B%%/gi, '<$1>');\ntext = text.replace(/%%I(\\/?i)I%%/gi, '<$1>');\ntext = text.replace(/%%A(.*?)A(.*?)AA%%/g, '<a href=\"$1\">$2</a>');\ntext = text.replace(/\\[(.*?)\\]/g, '$1');\n\ntext = text.trimStart();\nif (!text.startsWith('<b>')) text = '<b>🏛 Banques Centrales</b>\\n' + text;\n\nif (text.length > 4000) {\n  text = text.substring(0, 3950) + '\\n\\n... (tronqué)';\n}\n\nreturn [{ json: { clean_text: `📈 <b><a href=\"https://linktr.ee/kwce\">kwce</a> FINANCE DIGEST</b>\\n\\n${text}\\n\\n━━━━━━━━━━━━━━━\\nPropulsé par <a href=\"https://linktr.ee/kwce\">kwce</a>` } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        96
+      ],
+      "id": "b4ae5347-1b68-4316-b560-5f46f604c8f4",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const articles = $input.all().slice(0, 30).map(item => {\n  const title = item.json.title || 'Sans titre';\n  const link = item.json.link || item.json.url || '';\n  const desc = (item.json.contentSnippet || item.json.description || '').substring(0, 250);\n  return `- ${title}\\n  ${desc}\\n  ${link}`;\n}).join('\\n\\n');\n\nreturn [{ json: { articles_text: articles } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        528
+      ],
+      "id": "c15ab8f7-451f-474d-94c7-ca1ccb269136",
+      "name": "Code in JavaScript (Fusion)"
+    },
+    {
+      "parameters": {
+        "url": "https://www.forexlive.com/feed/news",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -128
+      ],
+      "id": "0f596122-e5c7-4215-b77f-2becd3e164ab",
+      "name": "ForexLive",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.mql5.com/en/blogs/rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        -128
+      ],
+      "id": "19af84df-18ce-4983-86b4-0af9ccb34ae7",
+      "name": "MQL5",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.tradingview.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        -128
+      ],
+      "id": "6cd0aad9-662d-4a4e-95cd-f498f6fd42b7",
+      "name": "TradingView",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.marketwatch.com/marketwatch/topstories/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        -128
+      ],
+      "id": "e957adc6-ce39-4e4b-b3e2-57759b2221a0",
+      "name": "MarketWatch",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://seekingalpha.com/market_currents.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        64
+      ],
+      "id": "5e586137-b1be-47b9-b694-07e4f4dcd3d7",
+      "name": "Seeking Alpha",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.actionforex.com/rss/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        64
+      ],
+      "id": "4c5ac050-18ef-4963-994d-835632f137b2",
+      "name": "Action Forex",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.bloomberg.com/markets/news.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        64
+      ],
+      "id": "58c2c1ea-b1c0-492f-8329-05a351c23ff2",
+      "name": "Bloomberg Markets",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.ft.com/markets?format=rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        64
+      ],
+      "id": "7be85ce3-69e8-4285-8885-5572d304ccba",
+      "name": "FT Markets",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.economist.com/finance-and-economics/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        256
+      ],
+      "id": "e5b110c2-88fd-4a3f-b626-974ea5d77dd1",
+      "name": "Economist Finance",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://finance.yahoo.com/news/rssindex",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        256
+      ],
+      "id": "fe333edd-e0e5-4303-aa3b-c99e7f021a6e",
+      "name": "Yahoo Finance",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://commodity.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        256
+      ],
+      "id": "b2266ff2-a68f-453f-9aab-f85469221a5a",
+      "name": "Commodity.com",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/wzAo94ap156mzE0A.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        256
+      ],
+      "id": "33fe6f4c-1cbc-4a8f-add5-de0745d81d4a",
+      "name": "Reuters Business",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.ft.com/global-economy?format=rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        448
+      ],
+      "id": "34e6c260-bb24-4667-bec3-adc5887b0fa0",
+      "name": "FT Global Economy",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.investing.com/rss/news.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        448
+      ],
+      "id": "a3f195be-6bb9-4e2c-a10e-d2c57a04abcb",
+      "name": "Investing.com",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/925ceas61G2NY9dy.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        448
+      ],
+      "id": "19a1178a-e2f5-4c5e-8d5a-458338114f14",
+      "name": "r/forex",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama-3.3-70b-versatile",
+          "mode": "list",
+          "cachedResultName": "llama-3.3-70b-versatile"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        320
+      ],
+      "id": "badb3221-de26-4a7f-b7f5-1da632b007b7",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_GROQ_OPENAI_COMPAT_CREDENTIAL_ID",
+          "name": "groq api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=⚠️ Source RSS down : {{ $json.error.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -304
+      ],
+      "id": "10301164-1d1e-4639-a924-2ffdef758daa",
+      "name": "Send a text message1",
+      "webhookId": "f1b8ade4-020e-428d-9dba-8c2d275c59ec",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_DEBUG_BOT_CREDENTIAL_ID",
+          "name": "t.me/kwcedebugbot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.ecb.europa.eu/rss/fap.html",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        448
+      ],
+      "id": "39435445-0b11-46b1-b986-731da70cbc9b",
+      "name": "BCE (ECB)",
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "r/forex",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "BCE (ECB)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Investing.com",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FT Global Economy",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reuters Business",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Commodity.com",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Yahoo Finance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Economist Finance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "ForexLive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MQL5",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MarketWatch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TradingView",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FT Markets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bloomberg Markets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Action Forex",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Seeking Alpha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge 1": {
+      "main": [
+        [
+          {
+            "node": "Merge 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge 2": {
+      "main": [
+        [
+          {
+            "node": "Merge 3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge 3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (Dedup)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript (Dedup)": {
+      "main": [
+        [
+          {
+            "node": "Filter (< 24h)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter (< 24h)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (Fusion)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript (Fusion)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ForexLive": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MQL5": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TradingView": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MarketWatch": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seeking Alpha": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 4
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Action Forex": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 5
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bloomberg Markets": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 6
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FT Markets": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 7
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Economist Finance": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yahoo Finance": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Commodity.com": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reuters Business": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FT Global Economy": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 7
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Investing.com": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 6
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "r/forex": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 4
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BCE (ECB)": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 5
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "8mwtMCWk0T2g0mSw",
+    "callerPolicy": "workflowsFromSameOwner",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9ad68a25-7f10-427d-beb7-5a20769f3d67",
+  "activeVersionId": "9ad68a25-7f10-427d-beb7-5a20769f3d67",
+  "triggerCount": 1,
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-04-19T14:04:21.144Z",
+    "createdAt": "2026-04-19T14:04:21.144Z",
+    "versionId": "9ad68a25-7f10-427d-beb7-5a20769f3d67",
+    "workflowId": "bQS6Cxzijz7gbOBo",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 4
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          32,
+          160
+        ],
+        "id": "32f73ac0-ad6a-4ffb-b3a4-9261bb8bb01d",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1312,
+          -192
+        ],
+        "id": "feb92095-44a1-4ed1-b129-63bc051c010c",
+        "name": "Merge 3"
+      },
+      {
+        "parameters": {
+          "numberInputs": 8
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1072,
+          -128
+        ],
+        "id": "1d371551-b7bb-44cb-8616-3d1b28c29fee",
+        "name": "Merge 1"
+      },
+      {
+        "parameters": {
+          "numberInputs": 8
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1072,
+          256
+        ],
+        "id": "a8fafe6e-05c4-4f66-a1c2-af452ef194f9",
+        "name": "Merge 2"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "af94450b-75bc-4a10-8418-26b897919326",
+                "leftValue": "={{ $json.pubDate || $json.isoDate || $json.published || $json.created }}",
+                "rightValue": "={{ $now.minus({ hours: 24 }).toISO() }}",
+                "operator": {
+                  "type": "dateTime",
+                  "operation": "after"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          1312,
+          288
+        ],
+        "id": "71110b76-4e3c-4fa3-99fd-62f198dfed58",
+        "name": "Filter (< 24h)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const seen = new Set();\nconst seenTitles = new Set();\nconst out = [];\n\nfor (const item of $input.all()) {\n  const url = item.json.link || item.json.url || item.json.guid || item.json.id;\n  \n  const rawTitle = item.json.title || '';\n  const normalizedTitle = rawTitle\n    .toLowerCase()\n    .replace(/[^\\w\\s]/g, '')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .substring(0, 60);\n  \n  if (seen.has(url) || seenTitles.has(normalizedTitle)) continue;\n  \n  seen.add(url);\n  seenTitles.add(normalizedTitle);\n  out.push(item);\n}\n\nreturn out;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1312,
+          48
+        ],
+        "id": "b7ad59e0-62f9-4293-b76b-34d136b140db",
+        "name": "Code in JavaScript (Dedup)"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Tu es l'agent de veille finance d'Upscale. Tu reçois des articles bruts RSS forex/macro/commodities des dernières 24h.\n\nRègles :\n- Si un événement majeur (décision FED/ECB/BCE, guerre, sanction, crash marché), commence par : 🚨 BREAKING\n- Max 8 items, classés par importance décroissante\n- Regroupe par catégorie avec emoji + gras\n- Pour chaque item : titre court (max 12 mots), résumé en 2 phrases MAX, lien\n- Ignore : \"Dow Jones up 0.1%\" noise quotidien, articles sponsorisés, prédictions sans fondement\n- Si vraiment rien de pertinent : \"RAS aujourd'hui.\" et stop\n- Pas de préambule, pas de conclusion\n\nFormat HTML obligatoire :\n<b>🚨 BREAKING</b> (si applicable)\n<b>🏛 Banques Centrales</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>💰 Forex & Devises</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🥇 Or & Matières Premières</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>📈 Macro & Marchés</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\nRÉPONDS EXACTEMENT COMME CET EXEMPLE (commence par la catégorie, pas par un item) :\n\n<b>🏛 Banques Centrales</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\n<b>💰 Forex & Devises</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\nMAINTENANT APPLIQUE CE FORMAT À CES ARTICLES :\n{{ $json.articles_text }}",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1712,
+          96
+        ],
+        "id": "2f66c305-183d-4e8e-b100-43a921eec34f",
+        "name": "AI Agent",
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 5000,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "={{ $json.clean_text }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          2256,
+          96
+        ],
+        "id": "62551f06-53ca-44ef-b9c6-8be7c1f47dea",
+        "name": "Send a text message",
+        "webhookId": "fd181110-09d5-4d2e-a231-6292dc1ea8f1",
+        "credentials": {
+          "telegramApi": {
+            "id": "PcPQUhSi6mw53xJP",
+            "name": "t.me/kwce_finance_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "let text = $input.first().json.output || $input.first().json.message?.content || $input.first().json.text || '';\n\ntext = text.replace(/^([\\s\\S]*?)(?=\\n[•🚨<])/, '');\ntext = text.replace(/\\n*(Let me know|Would you like|This message was|Feel free).*$/si, '');\n\ntext = text.replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>');\ntext = text.replace(/\\*(.*?)\\*/g, '<i>$1</i>');\ntext = text.replace(/\\[(.*?)\\]\\((https?:\\/\\/.*?)\\)/g, '<a href=\"$2\">$1</a>');\n\ntext = text.replace(/<(\\/?b)>/gi, '%%B$1B%%');\ntext = text.replace(/<(\\/?i)>/gi, '%%I$1I%%');\ntext = text.replace(/<a href=\"(.*?)\">(.*?)<\\/a>/gi, '%%A$1A$2AA%%');\ntext = text.replace(/[<>]/g, '');\ntext = text.replace(/%%B(\\/?b)B%%/gi, '<$1>');\ntext = text.replace(/%%I(\\/?i)I%%/gi, '<$1>');\ntext = text.replace(/%%A(.*?)A(.*?)AA%%/g, '<a href=\"$1\">$2</a>');\ntext = text.replace(/\\[(.*?)\\]/g, '$1');\n\ntext = text.trimStart();\nif (!text.startsWith('<b>')) text = '<b>🏛 Banques Centrales</b>\\n' + text;\n\nif (text.length > 4000) {\n  text = text.substring(0, 3950) + '\\n\\n... (tronqué)';\n}\n\nreturn [{ json: { clean_text: `📈 <b><a href=\"https://linktr.ee/kwce\">kwce</a> FINANCE DIGEST</b>\\n\\n${text}\\n\\n━━━━━━━━━━━━━━━\\nPropulsé par <a href=\"https://linktr.ee/kwce\">kwce</a>` } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2064,
+          96
+        ],
+        "id": "b4ae5347-1b68-4316-b560-5f46f604c8f4",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "jsCode": "const articles = $input.all().slice(0, 30).map(item => {\n  const title = item.json.title || 'Sans titre';\n  const link = item.json.link || item.json.url || '';\n  const desc = (item.json.contentSnippet || item.json.description || '').substring(0, 250);\n  return `- ${title}\\n  ${desc}\\n  ${link}`;\n}).join('\\n\\n');\n\nreturn [{ json: { articles_text: articles } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1312,
+          528
+        ],
+        "id": "c15ab8f7-451f-474d-94c7-ca1ccb269136",
+        "name": "Code in JavaScript (Fusion)"
+      },
+      {
+        "parameters": {
+          "url": "https://www.forexlive.com/feed/news",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          -128
+        ],
+        "id": "0f596122-e5c7-4215-b77f-2becd3e164ab",
+        "name": "ForexLive",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.mql5.com/en/blogs/rss",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          -128
+        ],
+        "id": "19af84df-18ce-4983-86b4-0af9ccb34ae7",
+        "name": "MQL5",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.tradingview.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          -128
+        ],
+        "id": "6cd0aad9-662d-4a4e-95cd-f498f6fd42b7",
+        "name": "TradingView",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://feeds.marketwatch.com/marketwatch/topstories/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          -128
+        ],
+        "id": "e957adc6-ce39-4e4b-b3e2-57759b2221a0",
+        "name": "MarketWatch",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://seekingalpha.com/market_currents.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          64
+        ],
+        "id": "5e586137-b1be-47b9-b694-07e4f4dcd3d7",
+        "name": "Seeking Alpha",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.actionforex.com/rss/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          64
+        ],
+        "id": "4c5ac050-18ef-4963-994d-835632f137b2",
+        "name": "Action Forex",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://feeds.bloomberg.com/markets/news.rss",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          64
+        ],
+        "id": "58c2c1ea-b1c0-492f-8329-05a351c23ff2",
+        "name": "Bloomberg Markets",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.ft.com/markets?format=rss",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          64
+        ],
+        "id": "7be85ce3-69e8-4285-8885-5572d304ccba",
+        "name": "FT Markets",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.economist.com/finance-and-economics/rss.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          256
+        ],
+        "id": "e5b110c2-88fd-4a3f-b626-974ea5d77dd1",
+        "name": "Economist Finance",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://finance.yahoo.com/news/rssindex",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          256
+        ],
+        "id": "fe333edd-e0e5-4303-aa3b-c99e7f021a6e",
+        "name": "Yahoo Finance",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://commodity.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          256
+        ],
+        "id": "b2266ff2-a68f-453f-9aab-f85469221a5a",
+        "name": "Commodity.com",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/wzAo94ap156mzE0A.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          256
+        ],
+        "id": "33fe6f4c-1cbc-4a8f-add5-de0745d81d4a",
+        "name": "Reuters Business",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.ft.com/global-economy?format=rss",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          448
+        ],
+        "id": "34e6c260-bb24-4667-bec3-adc5887b0fa0",
+        "name": "FT Global Economy",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.investing.com/rss/news.rss",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          448
+        ],
+        "id": "a3f195be-6bb9-4e2c-a10e-d2c57a04abcb",
+        "name": "Investing.com",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/925ceas61G2NY9dy.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          448
+        ],
+        "id": "19a1178a-e2f5-4c5e-8d5a-458338114f14",
+        "name": "r/forex",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "llama-3.3-70b-versatile",
+            "mode": "list",
+            "cachedResultName": "llama-3.3-70b-versatile"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1712,
+          320
+        ],
+        "id": "badb3221-de26-4a7f-b7f5-1da632b007b7",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_GROQ_OPENAI_COMPAT_CREDENTIAL_ID",
+            "name": "groq api"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "=⚠️ Source RSS down : {{ $json.error.message }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          -304
+        ],
+        "id": "10301164-1d1e-4639-a924-2ffdef758daa",
+        "name": "Send a text message1",
+        "webhookId": "f1b8ade4-020e-428d-9dba-8c2d275c59ec",
+        "credentials": {
+          "telegramApi": {
+            "id": "YOUR_TELEGRAM_DEBUG_BOT_CREDENTIAL_ID",
+            "name": "t.me/kwcedebugbot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "url": "https://www.ecb.europa.eu/rss/fap.html",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          448
+        ],
+        "id": "39435445-0b11-46b1-b986-731da70cbc9b",
+        "name": "BCE (ECB)",
+        "onError": "continueErrorOutput"
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "r/forex",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "BCE (ECB)",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Investing.com",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "FT Global Economy",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Reuters Business",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Commodity.com",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Yahoo Finance",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Economist Finance",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "ForexLive",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "MQL5",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "MarketWatch",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "TradingView",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "FT Markets",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Bloomberg Markets",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Action Forex",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Seeking Alpha",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge 1": {
+        "main": [
+          [
+            {
+              "node": "Merge 3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge 2": {
+        "main": [
+          [
+            {
+              "node": "Merge 3",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge 3": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript (Dedup)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript (Dedup)": {
+        "main": [
+          [
+            {
+              "node": "Filter (< 24h)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter (< 24h)": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript (Fusion)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send a text message": {
+        "main": [
+          []
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript (Fusion)": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ForexLive": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 3
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MQL5": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 2
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TradingView": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 1
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MarketWatch": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Seeking Alpha": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 4
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Action Forex": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 5
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Bloomberg Markets": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 6
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "FT Markets": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 7
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Economist Finance": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 3
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Yahoo Finance": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 2
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Commodity.com": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 1
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reuters Business": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "FT Global Economy": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 7
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Investing.com": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 6
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "r/forex": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 4
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "BCE (ECB)": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 5
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": null,
+    "description": null,
+    "autosaved": true
+  }
+}

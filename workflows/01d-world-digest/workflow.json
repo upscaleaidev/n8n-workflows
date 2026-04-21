@@ -1,0 +1,1983 @@
+{
+  "updatedAt": "2026-04-20T09:33:05.418Z",
+  "createdAt": "2026-04-17T13:48:15.858Z",
+  "id": "gm0wqu3vggduIXOj",
+  "name": "01d - World Digest",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        160
+      ],
+      "id": "2f97f74a-d06b-46e8-ab12-57a9c849b74e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1312,
+        -192
+      ],
+      "id": "f82fbf91-450c-4aa3-9096-ad8d3e9ff017",
+      "name": "Merge 3"
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        -128
+      ],
+      "id": "0a0d1cb1-f8b9-4bda-bb8a-95f63f0d7e53",
+      "name": "Merge 1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        256
+      ],
+      "id": "b1c2518a-6d80-4b42-a36f-0c9ebd7fef83",
+      "name": "Merge 2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "af94450b-75bc-4a10-8418-26b897919326",
+              "leftValue": "={{ $json.pubDate || $json.isoDate || $json.published || $json.created }}",
+              "rightValue": "={{ $now.minus({ hours: 24 }).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1312,
+        288
+      ],
+      "id": "a4bf1afc-093f-49eb-91dd-999bd03b3c7b",
+      "name": "Filter (< 24h)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const seen = new Set();\nconst seenTitles = new Set();\nconst out = [];\n\nfor (const item of $input.all()) {\n  const url = item.json.link || item.json.url || item.json.guid || item.json.id;\n  \n  // Normalise le titre pour dedup sémantique\n  const rawTitle = item.json.title || '';\n  const normalizedTitle = rawTitle\n    .toLowerCase()\n    .replace(/[^\\w\\s]/g, '')    // enlève ponctuation\n    .replace(/\\s+/g, ' ')        // normalise espaces\n    .trim()\n    .substring(0, 60);            // prend les 60 premiers chars (le vrai signal)\n  \n  // Skip si URL OU titre-normalisé déjà vu\n  if (seen.has(url) || seenTitles.has(normalizedTitle)) continue;\n  \n  seen.add(url);\n  seenTitles.add(normalizedTitle);\n  out.push(item);\n}\n\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        48
+      ],
+      "id": "cf918474-e188-4e48-b893-403557f0f38c",
+      "name": "Code in JavaScript (Dedup)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu es l'agent de veille géopolitique et business d'Upscale. Tu reçois des articles bruts RSS des dernières 24h.\n\nRègles :\n- Si un événement majeur est arrivé (guerre, sanction, décision FED/ECB, regulation tech, acquisition massive), commence par : 🚨 BREAKING\n- Max 8 items, classés par importance décroissante\n- Regroupe par catégorie avec emoji + gras\n- Pour chaque item : titre court (max 12 mots), résumé en 2 phrases MAX, lien\n- Ignore : gossip célébrités, sport, divertissement, articles sponsorisés, \"Trump said X\" si c'est juste du noise quotidien\n- Si vraiment rien de pertinent : \"RAS aujourd'hui.\" et stop\n- Pas de préambule, pas de conclusion, pas de \"voici votre digest\"\n- CHAQUE catégorie DOIT commencer par son en-tête (ex: <b>🌍 Géopolitique & Conflits</b>), y compris la toute première. Jamais d'items sans catégorie au-dessus.\n\nFormat HTML obligatoire :\n<b>🚨 BREAKING</b> (si applicable)\n<b>🌍 Géopolitique & Conflits</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🏛 Macro & Institutions</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>💼 Business & SaaS</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🔮 Tech & Société</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\nArticles :\nRÉPONDS EXACTEMENT COMME CET EXEMPLE (commence par la catégorie, pas par un item) :\n\n<b>🌍 Géopolitique & Conflits</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\n<b>🏛 Macro & Institutions</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\nMAINTENANT APPLIQUE CE FORMAT À CES ARTICLES :\n{{ $json.articles_text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1712,
+        96
+      ],
+      "id": "59f5c0c7-8085-4e50-95c5-ee2f2170d1aa",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 2,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.clean_text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        96
+      ],
+      "id": "c8d2bab6-bb54-4136-bf63-20811f4321ed",
+      "name": "Send a text message",
+      "webhookId": "992630e5-4e25-4c66-a002-d7ff8529747c",
+      "credentials": {
+        "telegramApi": {
+          "id": "wl0v5aJcYZWpK2bb",
+          "name": "t.me/kwce_world_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        -80
+      ],
+      "id": "e112a544-4b1a-498e-b036-7758b5e169eb",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "YOUR_GROQ_CREDENTIAL_ID",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Limiter à 30 articles max pour ne pas exploser le TPM Groq\nconst items = $input.all().slice(0, 30);\n\nconst articles = items.map(item => {\n  const title = item.json.title || 'Sans titre';\n  const link = item.json.link || item.json.url || '';\n  // Réduit la description à 150 chars pour économiser des tokens\n  const desc = (item.json.contentSnippet || item.json.description || '').substring(0, 150);\n  return `- ${title}\\n  ${desc}\\n  ${link}`;\n}).join('\\n\\n');\n\nreturn [{ json: { articles_text: articles } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        528
+      ],
+      "id": "204aa953-1b65-40fc-b807-2dbd36e1b617",
+      "name": "Code in JavaScript (Fusion)"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/5Ohk4T9DQep9q99n.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -128
+      ],
+      "id": "56baf238-6755-47d0-8159-7bd1b64f5e47",
+      "name": "WEF",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/6beEgJyeQpcUjI7G.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        -128
+      ],
+      "id": "f3948b05-1769-4a2c-bb38-17c5224080bf",
+      "name": "Elon Musk",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/T1FgDnqMjFiA0t0G.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        -128
+      ],
+      "id": "c313acda-af25-498b-ad1b-19b1c31182a1",
+      "name": "Trump",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.ft.com/global-economy?format=rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        -128
+      ],
+      "id": "38da2519-c100-4348-b116-c788c3e20059",
+      "name": "FT Global Economy",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.economist.com/international/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        64
+      ],
+      "id": "4ca7fe56-5772-4ca3-92b9-b4b8c6e7e02a",
+      "name": "Economist Geopolitics",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.economist.com/business/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        64
+      ],
+      "id": "91558709-7cf9-4dbe-b52e-32c3c871ec64",
+      "name": "Economist Business",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "http://feeds.bbci.co.uk/news/world/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        64
+      ],
+      "id": "b9da123a-18b6-462d-9013-c51817608b6e",
+      "name": "BBC World",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/IqOWdmzRgIWuiUU3.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        64
+      ],
+      "id": "bd3eaf74-87fc-4769-ada2-b881c2344379",
+      "name": "Reuters World",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/wzAo94ap156mzE0A.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        256
+      ],
+      "id": "0db351e1-8f09-476a-a539-24d0a392bce9",
+      "name": "Reuters Business",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.saastr.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        256
+      ],
+      "id": "9058a281-cc01-492e-a266-13e7a1b4662c",
+      "name": "SaaStr",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://venturebeat.com/category/ai/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        256
+      ],
+      "id": "c2531967-b602-4b80-9719-523ff91b0258",
+      "name": "VentureBeat",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        256
+      ],
+      "id": "4d1213bb-1e98-4e35-b050-99044f69bcb2",
+      "name": "TechCrunch",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.bloomberg.com/markets/news.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        448
+      ],
+      "id": "c2311fd2-6a16-42cd-8a8e-76684bd77321",
+      "name": "Bloomberg Markets",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        448
+      ],
+      "id": "d067aed1-4555-458f-9604-9ed8e546fd7a",
+      "name": "NYT World",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        448
+      ],
+      "id": "15711d2e-1d70-4a9b-adf0-eeee5d4eb26e",
+      "name": "NYT Business",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.aljazeera.com/xml/rss/all.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        448
+      ],
+      "id": "3a5b3749-a815-4a50-9462-a22f94eac043",
+      "name": "Al Jazeera",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $input.first().json.output || $input.first().json.message?.content || $input.first().json.text || '';\n\n// Supprime le préambule\ntext = text.replace(/^([\\s\\S]*?)(?=\\n[•🚨<])/, '');\n\n// Supprime la conclusion\ntext = text.replace(/\\n*(Let me know|Would you like|This message was|Feel free).*$/si, '');\n\n// Convertit Markdown en HTML AVANT la protection\ntext = text.replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>');\ntext = text.replace(/\\*(.*?)\\*/g, '<i>$1</i>');\ntext = text.replace(/\\[(.*?)\\]\\((https?:\\/\\/.*?)\\)/g, '<a href=\"$2\">$1</a>');\n\n// PROTECTION : isole les vraies balises avec des placeholders\ntext = text.replace(/<(\\/?b)>/gi, '%%B$1B%%');\ntext = text.replace(/<(\\/?i)>/gi, '%%I$1I%%');\ntext = text.replace(/<a href=\"(.*?)\">(.*?)<\\/a>/gi, '%%A$1A$2AA%%');\n\n// NUCLEAIRE : supprime TOUS les < et > restants\ntext = text.replace(/[<>]/g, '');\n\n// RESTAURATION : remet les vraies balises\ntext = text.replace(/%%B(\\/?b)B%%/gi, '<$1>');\ntext = text.replace(/%%I(\\/?i)I%%/gi, '<$1>');\ntext = text.replace(/%%A(.*?)A(.*?)AA%%/g, '<a href=\"$1\">$2</a>');\n\n// Nettoie les crochets orphelins\ntext = text.replace(/\\[(.*?)\\]/g, '$1');\n\n// Limite à 4000 chars\nif (text.length > 4000) {\n  text = text.substring(0, 3950) + '\\n\\n... (tronqué)';\n}\ntext = text.trimStart();\nif (!text.startsWith('<b>')) text = '<b>🌍 Géopolitique & Conflits</b>\\n' + text;\n\nreturn [{ json: { clean_text: `🌍 <b><a href=\"https://linktr.ee/kwce\">kwce</a> WORLD DIGEST</b>\\n\\n${text}\\n\\n━━━━━━━━━━━━━━━\\nPropulsé par <a href=\"https://linktr.ee/kwce\">kwce</a>` } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        96
+      ],
+      "id": "242819a7-598e-4aa3-bd0b-f97337bc7158",
+      "name": "Code in JavaScript (Format)"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama-3.3-70b-versatile",
+          "mode": "list",
+          "cachedResultName": "llama-3.3-70b-versatile"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        320
+      ],
+      "id": "0477d087-b49b-4f43-80f1-0214895c7346",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_GROQ_OPENAI_COMPAT_CREDENTIAL_ID",
+          "name": "groq api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "⚠️ Source RSS down : {{ $json.error.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -336
+      ],
+      "id": "bcbfe4eb-683a-4ac3-9dda-62748a2edc27",
+      "name": "Send a text message1",
+      "webhookId": "d6230d76-fe33-44c3-a85b-77b79d205db7",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_DEBUG_BOT_CREDENTIAL_ID",
+          "name": "t.me/kwcedebugbot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Al Jazeera",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NYT Business",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NYT World",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bloomberg Markets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TechCrunch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "VentureBeat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SaaStr",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reuters Business",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WEF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Elon Musk",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FT Global Economy",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Trump",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "BBC World",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Economist Business",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Economist Geopolitics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge 1": {
+      "main": [
+        [
+          {
+            "node": "Merge 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge 2": {
+      "main": [
+        [
+          {
+            "node": "Merge 3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge 3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (Dedup)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript (Dedup)": {
+      "main": [
+        [
+          {
+            "node": "Filter (< 24h)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter (< 24h)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (Fusion)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (Format)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Code in JavaScript (Fusion)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WEF": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Elon Musk": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trump": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FT Global Economy": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Economist Geopolitics": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 4
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Economist Business": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 5
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BBC World": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 6
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reuters World": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 7
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reuters Business": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SaaStr": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VentureBeat": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bloomberg Markets": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 4
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NYT World": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 5
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NYT Business": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 6
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Al Jazeera": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 7
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript (Format)": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "8mwtMCWk0T2g0mSw",
+    "callerPolicy": "workflowsFromSameOwner",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "14401265-c52f-42d9-9707-d9ea24aa31f7",
+  "activeVersionId": "14401265-c52f-42d9-9707-d9ea24aa31f7",
+  "triggerCount": 1,
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-04-19T14:06:22.552Z",
+    "createdAt": "2026-04-19T14:06:22.552Z",
+    "versionId": "14401265-c52f-42d9-9707-d9ea24aa31f7",
+    "workflowId": "gm0wqu3vggduIXOj",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 3
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          32,
+          160
+        ],
+        "id": "2f97f74a-d06b-46e8-ab12-57a9c849b74e",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1312,
+          -192
+        ],
+        "id": "f82fbf91-450c-4aa3-9096-ad8d3e9ff017",
+        "name": "Merge 3"
+      },
+      {
+        "parameters": {
+          "numberInputs": 8
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1072,
+          -128
+        ],
+        "id": "0a0d1cb1-f8b9-4bda-bb8a-95f63f0d7e53",
+        "name": "Merge 1"
+      },
+      {
+        "parameters": {
+          "numberInputs": 8
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1072,
+          256
+        ],
+        "id": "b1c2518a-6d80-4b42-a36f-0c9ebd7fef83",
+        "name": "Merge 2"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "af94450b-75bc-4a10-8418-26b897919326",
+                "leftValue": "={{ $json.pubDate || $json.isoDate || $json.published || $json.created }}",
+                "rightValue": "={{ $now.minus({ hours: 24 }).toISO() }}",
+                "operator": {
+                  "type": "dateTime",
+                  "operation": "after"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          1312,
+          288
+        ],
+        "id": "a4bf1afc-093f-49eb-91dd-999bd03b3c7b",
+        "name": "Filter (< 24h)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const seen = new Set();\nconst seenTitles = new Set();\nconst out = [];\n\nfor (const item of $input.all()) {\n  const url = item.json.link || item.json.url || item.json.guid || item.json.id;\n  \n  // Normalise le titre pour dedup sémantique\n  const rawTitle = item.json.title || '';\n  const normalizedTitle = rawTitle\n    .toLowerCase()\n    .replace(/[^\\w\\s]/g, '')    // enlève ponctuation\n    .replace(/\\s+/g, ' ')        // normalise espaces\n    .trim()\n    .substring(0, 60);            // prend les 60 premiers chars (le vrai signal)\n  \n  // Skip si URL OU titre-normalisé déjà vu\n  if (seen.has(url) || seenTitles.has(normalizedTitle)) continue;\n  \n  seen.add(url);\n  seenTitles.add(normalizedTitle);\n  out.push(item);\n}\n\nreturn out;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1312,
+          48
+        ],
+        "id": "cf918474-e188-4e48-b893-403557f0f38c",
+        "name": "Code in JavaScript (Dedup)"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Tu es l'agent de veille géopolitique et business d'Upscale. Tu reçois des articles bruts RSS des dernières 24h.\n\nRègles :\n- Si un événement majeur est arrivé (guerre, sanction, décision FED/ECB, regulation tech, acquisition massive), commence par : 🚨 BREAKING\n- Max 8 items, classés par importance décroissante\n- Regroupe par catégorie avec emoji + gras\n- Pour chaque item : titre court (max 12 mots), résumé en 2 phrases MAX, lien\n- Ignore : gossip célébrités, sport, divertissement, articles sponsorisés, \"Trump said X\" si c'est juste du noise quotidien\n- Si vraiment rien de pertinent : \"RAS aujourd'hui.\" et stop\n- Pas de préambule, pas de conclusion, pas de \"voici votre digest\"\n- CHAQUE catégorie DOIT commencer par son en-tête (ex: <b>🌍 Géopolitique & Conflits</b>), y compris la toute première. Jamais d'items sans catégorie au-dessus.\n\nFormat HTML obligatoire :\n<b>🚨 BREAKING</b> (si applicable)\n<b>🌍 Géopolitique & Conflits</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🏛 Macro & Institutions</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>💼 Business & SaaS</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🔮 Tech & Société</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\nArticles :\nRÉPONDS EXACTEMENT COMME CET EXEMPLE (commence par la catégorie, pas par un item) :\n\n<b>🌍 Géopolitique & Conflits</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\n<b>🏛 Macro & Institutions</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\nMAINTENANT APPLIQUE CE FORMAT À CES ARTICLES :\n{{ $json.articles_text }}",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1712,
+          96
+        ],
+        "id": "59f5c0c7-8085-4e50-95c5-ee2f2170d1aa",
+        "name": "AI Agent",
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "maxTries": 2,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "={{ $json.clean_text }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          2256,
+          96
+        ],
+        "id": "c8d2bab6-bb54-4136-bf63-20811f4321ed",
+        "name": "Send a text message",
+        "webhookId": "992630e5-4e25-4c66-a002-d7ff8529747c",
+        "credentials": {
+          "telegramApi": {
+            "id": "wl0v5aJcYZWpK2bb",
+            "name": "t.me/kwce_world_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": "llama-3.3-70b-versatile",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+        "typeVersion": 1,
+        "position": [
+          1712,
+          -80
+        ],
+        "id": "e112a544-4b1a-498e-b036-7758b5e169eb",
+        "name": "Groq Chat Model",
+        "credentials": {
+          "groqApi": {
+            "id": "YOUR_GROQ_CREDENTIAL_ID",
+            "name": "Groq account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Limiter à 30 articles max pour ne pas exploser le TPM Groq\nconst items = $input.all().slice(0, 30);\n\nconst articles = items.map(item => {\n  const title = item.json.title || 'Sans titre';\n  const link = item.json.link || item.json.url || '';\n  // Réduit la description à 150 chars pour économiser des tokens\n  const desc = (item.json.contentSnippet || item.json.description || '').substring(0, 150);\n  return `- ${title}\\n  ${desc}\\n  ${link}`;\n}).join('\\n\\n');\n\nreturn [{ json: { articles_text: articles } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1312,
+          528
+        ],
+        "id": "204aa953-1b65-40fc-b807-2dbd36e1b617",
+        "name": "Code in JavaScript (Fusion)"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/5Ohk4T9DQep9q99n.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          -128
+        ],
+        "id": "56baf238-6755-47d0-8159-7bd1b64f5e47",
+        "name": "WEF",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/6beEgJyeQpcUjI7G.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          -128
+        ],
+        "id": "f3948b05-1769-4a2c-bb38-17c5224080bf",
+        "name": "Elon Musk",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/T1FgDnqMjFiA0t0G.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          -128
+        ],
+        "id": "c313acda-af25-498b-ad1b-19b1c31182a1",
+        "name": "Trump",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.ft.com/global-economy?format=rss",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          -128
+        ],
+        "id": "38da2519-c100-4348-b116-c788c3e20059",
+        "name": "FT Global Economy",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.economist.com/international/rss.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          64
+        ],
+        "id": "4ca7fe56-5772-4ca3-92b9-b4b8c6e7e02a",
+        "name": "Economist Geopolitics",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.economist.com/business/rss.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          64
+        ],
+        "id": "91558709-7cf9-4dbe-b52e-32c3c871ec64",
+        "name": "Economist Business",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "http://feeds.bbci.co.uk/news/world/rss.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          64
+        ],
+        "id": "b9da123a-18b6-462d-9013-c51817608b6e",
+        "name": "BBC World",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/IqOWdmzRgIWuiUU3.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          64
+        ],
+        "id": "bd3eaf74-87fc-4769-ada2-b881c2344379",
+        "name": "Reuters World",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.app/feeds/wzAo94ap156mzE0A.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          256
+        ],
+        "id": "0db351e1-8f09-476a-a539-24d0a392bce9",
+        "name": "Reuters Business",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.saastr.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          256
+        ],
+        "id": "9058a281-cc01-492e-a266-13e7a1b4662c",
+        "name": "SaaStr",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://venturebeat.com/category/ai/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          256
+        ],
+        "id": "c2531967-b602-4b80-9719-523ff91b0258",
+        "name": "VentureBeat",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://techcrunch.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          256
+        ],
+        "id": "4d1213bb-1e98-4e35-b050-99044f69bcb2",
+        "name": "TechCrunch",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://feeds.bloomberg.com/markets/news.rss",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          448
+        ],
+        "id": "c2311fd2-6a16-42cd-8a8e-76684bd77321",
+        "name": "Bloomberg Markets",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          448
+        ],
+        "id": "d067aed1-4555-458f-9604-9ed8e546fd7a",
+        "name": "NYT World",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          448
+        ],
+        "id": "15711d2e-1d70-4a9b-adf0-eeee5d4eb26e",
+        "name": "NYT Business",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.aljazeera.com/xml/rss/all.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          448
+        ],
+        "id": "3a5b3749-a815-4a50-9462-a22f94eac043",
+        "name": "Al Jazeera",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "let text = $input.first().json.output || $input.first().json.message?.content || $input.first().json.text || '';\n\n// Supprime le préambule\ntext = text.replace(/^([\\s\\S]*?)(?=\\n[•🚨<])/, '');\n\n// Supprime la conclusion\ntext = text.replace(/\\n*(Let me know|Would you like|This message was|Feel free).*$/si, '');\n\n// Convertit Markdown en HTML AVANT la protection\ntext = text.replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>');\ntext = text.replace(/\\*(.*?)\\*/g, '<i>$1</i>');\ntext = text.replace(/\\[(.*?)\\]\\((https?:\\/\\/.*?)\\)/g, '<a href=\"$2\">$1</a>');\n\n// PROTECTION : isole les vraies balises avec des placeholders\ntext = text.replace(/<(\\/?b)>/gi, '%%B$1B%%');\ntext = text.replace(/<(\\/?i)>/gi, '%%I$1I%%');\ntext = text.replace(/<a href=\"(.*?)\">(.*?)<\\/a>/gi, '%%A$1A$2AA%%');\n\n// NUCLEAIRE : supprime TOUS les < et > restants\ntext = text.replace(/[<>]/g, '');\n\n// RESTAURATION : remet les vraies balises\ntext = text.replace(/%%B(\\/?b)B%%/gi, '<$1>');\ntext = text.replace(/%%I(\\/?i)I%%/gi, '<$1>');\ntext = text.replace(/%%A(.*?)A(.*?)AA%%/g, '<a href=\"$1\">$2</a>');\n\n// Nettoie les crochets orphelins\ntext = text.replace(/\\[(.*?)\\]/g, '$1');\n\n// Limite à 4000 chars\nif (text.length > 4000) {\n  text = text.substring(0, 3950) + '\\n\\n... (tronqué)';\n}\ntext = text.trimStart();\nif (!text.startsWith('<b>')) text = '<b>🌍 Géopolitique & Conflits</b>\\n' + text;\n\nreturn [{ json: { clean_text: `🌍 <b><a href=\"https://linktr.ee/kwce\">kwce</a> WORLD DIGEST</b>\\n\\n${text}\\n\\n━━━━━━━━━━━━━━━\\nPropulsé par <a href=\"https://linktr.ee/kwce\">kwce</a>` } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2064,
+          96
+        ],
+        "id": "242819a7-598e-4aa3-bd0b-f97337bc7158",
+        "name": "Code in JavaScript (Format)"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "llama-3.3-70b-versatile",
+            "mode": "list",
+            "cachedResultName": "llama-3.3-70b-versatile"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1712,
+          320
+        ],
+        "id": "0477d087-b49b-4f43-80f1-0214895c7346",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_GROQ_OPENAI_COMPAT_CREDENTIAL_ID",
+            "name": "groq api"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "⚠️ Source RSS down : {{ $json.error.message }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          -336
+        ],
+        "id": "bcbfe4eb-683a-4ac3-9dda-62748a2edc27",
+        "name": "Send a text message1",
+        "webhookId": "d6230d76-fe33-44c3-a85b-77b79d205db7",
+        "credentials": {
+          "telegramApi": {
+            "id": "YOUR_TELEGRAM_DEBUG_BOT_CREDENTIAL_ID",
+            "name": "t.me/kwcedebugbot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Al Jazeera",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "NYT Business",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "NYT World",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Bloomberg Markets",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "TechCrunch",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "VentureBeat",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "SaaStr",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Reuters Business",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "WEF",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Elon Musk",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "FT Global Economy",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Trump",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "BBC World",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Economist Business",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Economist Geopolitics",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge 1": {
+        "main": [
+          [
+            {
+              "node": "Merge 3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge 2": {
+        "main": [
+          [
+            {
+              "node": "Merge 3",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge 3": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript (Dedup)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript (Dedup)": {
+        "main": [
+          [
+            {
+              "node": "Filter (< 24h)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter (< 24h)": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript (Fusion)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript (Format)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send a text message": {
+        "main": [
+          []
+        ]
+      },
+      "Groq Chat Model": {
+        "ai_languageModel": [
+          []
+        ]
+      },
+      "Code in JavaScript (Fusion)": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "WEF": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 3
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Elon Musk": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 2
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Trump": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 1
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "FT Global Economy": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Economist Geopolitics": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 4
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Economist Business": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 5
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "BBC World": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 6
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reuters World": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 7
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reuters Business": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 3
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "SaaStr": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 2
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "VentureBeat": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 1
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TechCrunch": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Bloomberg Markets": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 4
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NYT World": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 5
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NYT Business": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 6
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Al Jazeera": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 7
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript (Format)": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": null,
+    "description": null,
+    "autosaved": false
+  }
+}

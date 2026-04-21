@@ -1,0 +1,1761 @@
+{
+  "updatedAt": "2026-04-19T14:00:41.478Z",
+  "createdAt": "2026-04-18T16:13:14.567Z",
+  "id": "9ABJOciAQ9YFCOXs",
+  "name": "02 - Tri Mail Intelligent",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "includeSpamTrash": false,
+          "includeDrafts": false,
+          "labelIds": [],
+          "q": "is:unread",
+          "readStatus": "unread",
+          "sender": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1360,
+        608
+      ],
+      "id": "ae33920d-48b6-4264-a621-e9a438983dff",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu classes UN mail entrant dans UNE de ces 8 catégories, rien d'autre.\n\nLes 8 catégories :\n1. URGENT_CLIENT — un client payant actuel a un blocage ou pose une question technique\n2. PROSPECT_CHAUD — un prospect répond à une candidature Malt/Fiverr/Upwork OU pose une question tarif/dispo\n3. PROSPECT_FROID — cold outreach reçu (agence, pige), à ignorer sauf si vraiment pertinent\n4. ADMIN_LEGAL — URSSAF, INPI, banque, fiscalité, ForPro, MLJ66, eCandidat\n5. ADMIN_OUTIL — notifications SaaS (n8n, Hetzner, OpenAI, Groq, GitHub, Gumroad)\n6. PERSO — famille, amis, Sofia, non professionnel\n7. NEWSLETTER — abonnements volontaires pas urgents\n- Notifications de réseaux sociaux (LinkedIn, Twitter, etc.)\n8. SPAM_NOIR — spam pur, tentative phishing, hameçonnage\n\nRègles de priorité (si doute) :\n- Urgence potentielle → URGENT_CLIENT\n- Mot \"invoice\", \"facture\", \"paiement\" → URGENT_CLIENT ou ADMIN_LEGAL selon context\n- Mention explicite d'Upscale + demande → PROSPECT_CHAUD minimum\n- Aucun context Upscale → probablement PROSPECT_FROID, NEWSLETTER, ou SPAM_NOIR\n- Expéditeur @linkedin.com, @twitter.com, @facebook.com, @instagram.com → NEWSLETTER systématiquement, sauf si c'est une réponse directe d'un humain\n\nFormat de sortie : JSON strict uniquement, rien d'autre avant ou après.\n\n{\n  \"category\": \"ONE_OF_8_CATEGORIES\",\n  \"confidence\": 0.0-1.0,\n  \"action_suggested\": \"reply_now\" | \"reply_today\" | \"read_later\" | \"ignore\",\n  \"one_line_summary\": \"Résumé ultra-court en français (max 15 mots)\"\n} \n{{ $json.prompt_input }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -944,
+        608
+      ],
+      "id": "45a0a3a1-6420-4b7d-95a1-411447453fb5",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "URGENT_CLIENT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "7569cfce-32d7-4e45-b87c-3dbb202a89dd"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "190bbd0a-3d70-491b-9deb-445a0b992ab4",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "PROSPECT_CHAUD",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4e1343a2-44af-4e45-8faa-4868329efe39",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "PROSPECT_FROID",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "db8c38a1-d69b-4220-998e-963319f89078",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "ADMIN_LEGAL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "433eee25-7541-428d-8277-be77435ef635",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "ADMIN_OUTIL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5ef859bd-acc1-4080-b2b7-eafa4dbdcd47",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "PERSO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "536fb067-839b-4da4-b0c6-f6ed2a1c38bb",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "NEWSLETTER",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e7b80e02-5e47-4eff-9c2e-ce3471008739",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "SPAM_NOIR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -336,
+        496
+      ],
+      "id": "99903acd-aa9b-4858-98a8-f368956a17d8",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama-3.1-8b-instant",
+          "mode": "list",
+          "cachedResultName": "llama-3.1-8b-instant"
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 200,
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -944,
+        816
+      ],
+      "id": "91aa0c10-12dc-4bf0-b0e8-423c54e0c913",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_GROQ_OPENAI_COMPAT_CREDENTIAL_ID",
+          "name": "groq api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\n// Tronque le body pour pas saturer le prompt (seuil 1500 chars)\nconst bodyRaw = item.textPlain || item.text || item.snippet || '';\nconst bodyTruncated = bodyRaw.substring(0, 1500);\n\n// Extract from / subject / date\nconst from = item.from?.value?.[0]?.address || item.from || 'unknown';\nconst subject = item.subject || '(sans sujet)';\nconst date = item.internalDate || new Date().toISOString();\n\nreturn [{\n  json: {\n    message_id: item.id,\n    thread_id: item.threadId,\n    from: from,\n    subject: subject,\n    body: bodyTruncated,\n    date: date,\n    // On prépare un bloc texte propre pour le prompt\n    prompt_input: `From: ${from}\\nSubject: ${subject}\\nBody: ${bodyTruncated}`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1136,
+        608
+      ],
+      "id": "46c42ae2-8691-4a09-a571-65a3f767f026",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.message?.content \n         || $input.first().json.output \n         || $input.first().json.text \n         || '{}';\n\nlet parsed;\ntry {\n  // Strip potentielles backticks markdown si le modèle en ajoute\n  const clean = raw.replace(/```json|```/g, '').trim();\n  parsed = JSON.parse(clean);\n} catch (e) {\n  // Fallback si JSON invalide → catégorise en PERSO par défaut (safe)\n  parsed = {\n    category: 'PERSO',\n    confidence: 0,\n    action_suggested: 'read_later',\n    one_line_summary: 'Erreur parse JSON, à revoir manuellement'\n  };\n}\n\n// Récupère les metadata du mail original\nconst mailData = $('Code in JavaScript').first().json;\n\nreturn [{\n  json: {\n    ...parsed,\n    message_id: mailData.message_id,\n    thread_id: mailData.thread_id,\n    from: mailData.from,\n    subject: mailData.subject\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        592
+      ],
+      "id": "8b31460a-2905-4411-9d67-c84197dc5b8e",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.message_id }}",
+        "labelIds": [
+          "Label_22168805984027931"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        1168
+      ],
+      "id": "81f6bd2d-34fb-415b-972d-a42583e5ad4f",
+      "name": "Add label SPAM_NOIR",
+      "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.message_id }}",
+        "labelIds": [
+          "Label_2811786666820682291"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        1008
+      ],
+      "id": "48a05d5c-f567-419e-a306-b93464c555a8",
+      "name": "Add label NEWSLETTER",
+      "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.message_id }}",
+        "labelIds": [
+          "Label_5381182937499564339"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        848
+      ],
+      "id": "1d5340b2-9924-4ef3-9e1c-40e9679f0441",
+      "name": "Add label PERSO",
+      "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.message_id }}",
+        "labelIds": [
+          "Label_4584080895753376726"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        688
+      ],
+      "id": "ae35dd54-00e8-433c-baf4-4691e81578c5",
+      "name": "Add label ADMIN_OUTIL",
+      "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.message_id }}",
+        "labelIds": [
+          "Label_2650674365199706342"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        528
+      ],
+      "id": "379c1aa3-6a8a-4b1e-88b6-1ecb2bdbf9e8",
+      "name": "Add label ADMIN_LEGAL",
+      "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.message_id }}",
+        "labelIds": [
+          "Label_2797239668880938068"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        352
+      ],
+      "id": "4348932e-81f8-4d67-b564-ce227931f6e0",
+      "name": "Add label PROSPECT_FROID",
+      "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.message_id }}",
+        "labelIds": [
+          "Label_2174336757403359484"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        176
+      ],
+      "id": "91129759-8bb8-4626-b380-281e1095931e",
+      "name": "Add label PROSPECT_CHAUD",
+      "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.message_id }}",
+        "labelIds": [
+          "Label_8082008364999567260"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "584b948c-75ca-453f-9344-a7e04a9a260b",
+      "name": "Add label URGENT_CLIENT",
+      "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=🚨 <b>MAIL URGENT CLIENT</b>\n\nDe : {{ $('Code in JavaScript2').first().json.from }}\nObjet : {{ $('Code in JavaScript2').first().json.subject }}\nRésumé : {{ $('Code in JavaScript2').first().json.one_line_summary }}\nAction : {{ $('Code in JavaScript2').first().json.action_suggested }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        0
+      ],
+      "id": "8cd7ebc9-5280-453f-b148-688092e4bf70",
+      "name": "Send a text message",
+      "webhookId": "a0ae3f88-f67e-4b37-8588-1edc9022a365",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_BOT_CREDENTIAL_ID",
+          "name": "t.me/kwcebot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=🔥 <b>PROSPECT CHAUD</b>\n\nDe : {{ $('Code in JavaScript2').first().json.from }}\nObjet : {{ $('Code in JavaScript2').first().json.subject }}\nRésumé : {{ $('Code in JavaScript2').first().json.one_line_summary }}\nAction : {{ $('Code in JavaScript2').first().json.action_suggested }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        176
+      ],
+      "id": "e7bf25f8-e1ec-4f75-89d2-8a6e6791c529",
+      "name": "Send a text message1",
+      "webhookId": "a0ae3f88-f67e-4b37-8588-1edc9022a365",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_BOT_CREDENTIAL_ID",
+          "name": "t.me/kwcebot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "email_triage",
+          "mode": "list",
+          "cachedResultName": "email_triage"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "confidence": "={{ $json.confidence }}",
+            "message_id": "={{ $json.message_id }}",
+            "thread_id": "={{ $json.thread_id }}",
+            "from_email": "={{ $json.from }}",
+            "category": "={{ $json.category }}",
+            "subject": "={{ $json.subject }}",
+            "action_suggested": "={{ $json.action_suggested }}",
+            "summary": "={{ $json.one_line_summary }}"
+          },
+          "matchingColumns": [
+            "message_id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "thread_id",
+              "displayName": "thread_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "from_email",
+              "displayName": "from_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "action_suggested",
+              "displayName": "action_suggested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "processed_at",
+              "displayName": "processed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "digest_sent",
+              "displayName": "digest_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -560,
+        832
+      ],
+      "id": "3a004c5d-eab1-4569-9b3e-7b62a48d2e42",
+      "name": "Insert or update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Add label URGENT_CLIENT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label PROSPECT_CHAUD",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label PROSPECT_FROID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label ADMIN_LEGAL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label ADMIN_OUTIL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label PERSO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label NEWSLETTER",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label SPAM_NOIR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Insert or update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label URGENT_CLIENT": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label PROSPECT_CHAUD": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Gmail Trigger": {
+      "Gmail Trigger": {
+        "lastTimeChecked": 1776770103,
+        "possibleDuplicates": [
+          "19dafc0430ca7706",
+          "19dafb1ce89ecae8"
+        ]
+      }
+    }
+  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "ae676ec7-0668-4146-b911-0388890e21af",
+  "activeVersionId": "ae676ec7-0668-4146-b911-0388890e21af",
+  "triggerCount": 1,
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-04-19T14:00:41.479Z",
+    "createdAt": "2026-04-19T14:00:41.479Z",
+    "versionId": "ae676ec7-0668-4146-b911-0388890e21af",
+    "workflowId": "9ABJOciAQ9YFCOXs",
+    "nodes": [
+      {
+        "parameters": {
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "value": 5,
+                "unit": "minutes"
+              }
+            ]
+          },
+          "simple": false,
+          "filters": {
+            "includeSpamTrash": false,
+            "includeDrafts": false,
+            "labelIds": [],
+            "q": "is:unread",
+            "readStatus": "unread",
+            "sender": ""
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmailTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -1360,
+          608
+        ],
+        "id": "ae33920d-48b6-4264-a621-e9a438983dff",
+        "name": "Gmail Trigger",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Tu classes UN mail entrant dans UNE de ces 8 catégories, rien d'autre.\n\nLes 8 catégories :\n1. URGENT_CLIENT — un client payant actuel a un blocage ou pose une question technique\n2. PROSPECT_CHAUD — un prospect répond à une candidature Malt/Fiverr/Upwork OU pose une question tarif/dispo\n3. PROSPECT_FROID — cold outreach reçu (agence, pige), à ignorer sauf si vraiment pertinent\n4. ADMIN_LEGAL — URSSAF, INPI, banque, fiscalité, ForPro, MLJ66, eCandidat\n5. ADMIN_OUTIL — notifications SaaS (n8n, Hetzner, OpenAI, Groq, GitHub, Gumroad)\n6. PERSO — famille, amis, Sofia, non professionnel\n7. NEWSLETTER — abonnements volontaires pas urgents\n- Notifications de réseaux sociaux (LinkedIn, Twitter, etc.)\n8. SPAM_NOIR — spam pur, tentative phishing, hameçonnage\n\nRègles de priorité (si doute) :\n- Urgence potentielle → URGENT_CLIENT\n- Mot \"invoice\", \"facture\", \"paiement\" → URGENT_CLIENT ou ADMIN_LEGAL selon context\n- Mention explicite d'Upscale + demande → PROSPECT_CHAUD minimum\n- Aucun context Upscale → probablement PROSPECT_FROID, NEWSLETTER, ou SPAM_NOIR\n- Expéditeur @linkedin.com, @twitter.com, @facebook.com, @instagram.com → NEWSLETTER systématiquement, sauf si c'est une réponse directe d'un humain\n\nFormat de sortie : JSON strict uniquement, rien d'autre avant ou après.\n\n{\n  \"category\": \"ONE_OF_8_CATEGORIES\",\n  \"confidence\": 0.0-1.0,\n  \"action_suggested\": \"reply_now\" | \"reply_today\" | \"read_later\" | \"ignore\",\n  \"one_line_summary\": \"Résumé ultra-court en français (max 15 mots)\"\n} \n{{ $json.prompt_input }}",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          -944,
+          608
+        ],
+        "id": "45a0a3a1-6420-4b7d-95a1-411447453fb5",
+        "name": "AI Agent",
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 5000,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.category }}",
+                      "rightValue": "URGENT_CLIENT",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "7569cfce-32d7-4e45-b87c-3dbb202a89dd"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "190bbd0a-3d70-491b-9deb-445a0b992ab4",
+                      "leftValue": "={{ $json.category }}",
+                      "rightValue": "PROSPECT_CHAUD",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "4e1343a2-44af-4e45-8faa-4868329efe39",
+                      "leftValue": "={{ $json.category }}",
+                      "rightValue": "PROSPECT_FROID",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "db8c38a1-d69b-4220-998e-963319f89078",
+                      "leftValue": "={{ $json.category }}",
+                      "rightValue": "ADMIN_LEGAL",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "433eee25-7541-428d-8277-be77435ef635",
+                      "leftValue": "={{ $json.category }}",
+                      "rightValue": "ADMIN_OUTIL",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "5ef859bd-acc1-4080-b2b7-eafa4dbdcd47",
+                      "leftValue": "={{ $json.category }}",
+                      "rightValue": "PERSO",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "536fb067-839b-4da4-b0c6-f6ed2a1c38bb",
+                      "leftValue": "={{ $json.category }}",
+                      "rightValue": "NEWSLETTER",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "e7b80e02-5e47-4eff-9c2e-ce3471008739",
+                      "leftValue": "={{ $json.category }}",
+                      "rightValue": "SPAM_NOIR",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          -336,
+          496
+        ],
+        "id": "99903acd-aa9b-4858-98a8-f368956a17d8",
+        "name": "Switch"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "llama-3.1-8b-instant",
+            "mode": "list",
+            "cachedResultName": "llama-3.1-8b-instant"
+          },
+          "builtInTools": {},
+          "options": {
+            "maxTokens": 200,
+            "temperature": 0.1
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          -944,
+          816
+        ],
+        "id": "91aa0c10-12dc-4bf0-b0e8-423c54e0c913",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_GROQ_OPENAI_COMPAT_CREDENTIAL_ID",
+            "name": "groq api"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const item = $input.first().json;\n\n// Tronque le body pour pas saturer le prompt (seuil 1500 chars)\nconst bodyRaw = item.textPlain || item.text || item.snippet || '';\nconst bodyTruncated = bodyRaw.substring(0, 1500);\n\n// Extract from / subject / date\nconst from = item.from?.value?.[0]?.address || item.from || 'unknown';\nconst subject = item.subject || '(sans sujet)';\nconst date = item.internalDate || new Date().toISOString();\n\nreturn [{\n  json: {\n    message_id: item.id,\n    thread_id: item.threadId,\n    from: from,\n    subject: subject,\n    body: bodyTruncated,\n    date: date,\n    // On prépare un bloc texte propre pour le prompt\n    prompt_input: `From: ${from}\\nSubject: ${subject}\\nBody: ${bodyTruncated}`\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1136,
+          608
+        ],
+        "id": "46c42ae2-8691-4a09-a571-65a3f767f026",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "jsCode": "const raw = $input.first().json.message?.content \n         || $input.first().json.output \n         || $input.first().json.text \n         || '{}';\n\nlet parsed;\ntry {\n  // Strip potentielles backticks markdown si le modèle en ajoute\n  const clean = raw.replace(/```json|```/g, '').trim();\n  parsed = JSON.parse(clean);\n} catch (e) {\n  // Fallback si JSON invalide → catégorise en PERSO par défaut (safe)\n  parsed = {\n    category: 'PERSO',\n    confidence: 0,\n    action_suggested: 'read_later',\n    one_line_summary: 'Erreur parse JSON, à revoir manuellement'\n  };\n}\n\n// Récupère les metadata du mail original\nconst mailData = $('Code in JavaScript').first().json;\n\nreturn [{\n  json: {\n    ...parsed,\n    message_id: mailData.message_id,\n    thread_id: mailData.thread_id,\n    from: mailData.from,\n    subject: mailData.subject\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -560,
+          592
+        ],
+        "id": "8b31460a-2905-4411-9d67-c84197dc5b8e",
+        "name": "Code in JavaScript2"
+      },
+      {
+        "parameters": {
+          "operation": "addLabels",
+          "messageId": "={{ $json.message_id }}",
+          "labelIds": [
+            "Label_22168805984027931"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          1168
+        ],
+        "id": "81f6bd2d-34fb-415b-972d-a42583e5ad4f",
+        "name": "Add label SPAM_NOIR",
+        "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "addLabels",
+          "messageId": "={{ $json.message_id }}",
+          "labelIds": [
+            "Label_2811786666820682291"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          1008
+        ],
+        "id": "48a05d5c-f567-419e-a306-b93464c555a8",
+        "name": "Add label NEWSLETTER",
+        "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "addLabels",
+          "messageId": "={{ $json.message_id }}",
+          "labelIds": [
+            "Label_5381182937499564339"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          848
+        ],
+        "id": "1d5340b2-9924-4ef3-9e1c-40e9679f0441",
+        "name": "Add label PERSO",
+        "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "addLabels",
+          "messageId": "={{ $json.message_id }}",
+          "labelIds": [
+            "Label_4584080895753376726"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          688
+        ],
+        "id": "ae35dd54-00e8-433c-baf4-4691e81578c5",
+        "name": "Add label ADMIN_OUTIL",
+        "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "addLabels",
+          "messageId": "={{ $json.message_id }}",
+          "labelIds": [
+            "Label_2650674365199706342"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          528
+        ],
+        "id": "379c1aa3-6a8a-4b1e-88b6-1ecb2bdbf9e8",
+        "name": "Add label ADMIN_LEGAL",
+        "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "addLabels",
+          "messageId": "={{ $json.message_id }}",
+          "labelIds": [
+            "Label_2797239668880938068"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          352
+        ],
+        "id": "4348932e-81f8-4d67-b564-ce227931f6e0",
+        "name": "Add label PROSPECT_FROID",
+        "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "addLabels",
+          "messageId": "={{ $json.message_id }}",
+          "labelIds": [
+            "Label_2174336757403359484"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          176
+        ],
+        "id": "91129759-8bb8-4626-b380-281e1095931e",
+        "name": "Add label PROSPECT_CHAUD",
+        "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "addLabels",
+          "messageId": "={{ $json.message_id }}",
+          "labelIds": [
+            "Label_8082008364999567260"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          0
+        ],
+        "id": "584b948c-75ca-453f-9344-a7e04a9a260b",
+        "name": "Add label URGENT_CLIENT",
+        "webhookId": "aa403bc8-bfda-4708-b24d-f1907f3e6349",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail jmtrvrsblcke@gmail.com OAuth2 API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "=🚨 <b>MAIL URGENT CLIENT</b>\n\nDe : {{ $('Code in JavaScript2').first().json.from }}\nObjet : {{ $('Code in JavaScript2').first().json.subject }}\nRésumé : {{ $('Code in JavaScript2').first().json.one_line_summary }}\nAction : {{ $('Code in JavaScript2').first().json.action_suggested }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          320,
+          0
+        ],
+        "id": "8cd7ebc9-5280-453f-b148-688092e4bf70",
+        "name": "Send a text message",
+        "webhookId": "a0ae3f88-f67e-4b37-8588-1edc9022a365",
+        "credentials": {
+          "telegramApi": {
+            "id": "YOUR_TELEGRAM_BOT_CREDENTIAL_ID",
+            "name": "t.me/kwcebot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "=🔥 <b>PROSPECT CHAUD</b>\n\nDe : {{ $('Code in JavaScript2').first().json.from }}\nObjet : {{ $('Code in JavaScript2').first().json.subject }}\nRésumé : {{ $('Code in JavaScript2').first().json.one_line_summary }}\nAction : {{ $('Code in JavaScript2').first().json.action_suggested }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          320,
+          176
+        ],
+        "id": "e7bf25f8-e1ec-4f75-89d2-8a6e6791c529",
+        "name": "Send a text message1",
+        "webhookId": "a0ae3f88-f67e-4b37-8588-1edc9022a365",
+        "credentials": {
+          "telegramApi": {
+            "id": "YOUR_TELEGRAM_BOT_CREDENTIAL_ID",
+            "name": "t.me/kwcebot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "upsert",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "email_triage",
+            "mode": "list",
+            "cachedResultName": "email_triage"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "confidence": "={{ $json.confidence }}",
+              "message_id": "={{ $json.message_id }}",
+              "thread_id": "={{ $json.thread_id }}",
+              "from_email": "={{ $json.from }}",
+              "category": "={{ $json.category }}",
+              "subject": "={{ $json.subject }}",
+              "action_suggested": "={{ $json.action_suggested }}",
+              "summary": "={{ $json.one_line_summary }}"
+            },
+            "matchingColumns": [
+              "message_id"
+            ],
+            "schema": [
+              {
+                "id": "id",
+                "displayName": "id",
+                "required": false,
+                "defaultMatch": true,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "message_id",
+                "displayName": "message_id",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "thread_id",
+                "displayName": "thread_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false,
+                "removed": false
+              },
+              {
+                "id": "from_email",
+                "displayName": "from_email",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false,
+                "removed": false
+              },
+              {
+                "id": "subject",
+                "displayName": "subject",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false,
+                "removed": false
+              },
+              {
+                "id": "category",
+                "displayName": "category",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false,
+                "removed": false
+              },
+              {
+                "id": "confidence",
+                "displayName": "confidence",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false,
+                "removed": false
+              },
+              {
+                "id": "action_suggested",
+                "displayName": "action_suggested",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false,
+                "removed": false
+              },
+              {
+                "id": "summary",
+                "displayName": "summary",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false,
+                "removed": false
+              },
+              {
+                "id": "processed_at",
+                "displayName": "processed_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": false,
+                "removed": true
+              },
+              {
+                "id": "digest_sent",
+                "displayName": "digest_sent",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "canBeUsedToMatch": false,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -560,
+          832
+        ],
+        "id": "3a004c5d-eab1-4569-9b3e-7b62a48d2e42",
+        "name": "Insert or update rows in a table",
+        "credentials": {
+          "postgres": {
+            "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+            "name": "Postgres account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Gmail Trigger": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch": {
+        "main": [
+          [
+            {
+              "node": "Add label URGENT_CLIENT",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Add label PROSPECT_CHAUD",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Add label PROSPECT_FROID",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Add label ADMIN_LEGAL",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Add label ADMIN_OUTIL",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Add label PERSO",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Add label NEWSLETTER",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Add label SPAM_NOIR",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript2": {
+        "main": [
+          [
+            {
+              "node": "Switch",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Insert or update rows in a table",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Add label URGENT_CLIENT": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Add label PROSPECT_CHAUD": {
+        "main": [
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": null,
+    "description": null,
+    "autosaved": false
+  }
+}

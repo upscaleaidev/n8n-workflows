@@ -1,0 +1,215 @@
+{
+  "updatedAt": "2026-04-20T09:38:52.956Z",
+  "createdAt": "2026-04-19T17:04:09.504Z",
+  "id": "fSOOOID59VUQDCny",
+  "name": "07 — Stripe Onboarding",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "wf07-wh-001",
+      "name": "Stripe Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "path": "stripe-payment",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "webhookId": "c4a25b04-d70e-4c26-b0a6-2e0577d4f3ec"
+    },
+    {
+      "id": "wf07-parse-002",
+      "name": "Code Parse Stripe",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst session = body.data?.object || {};\nconst email = (session.customer_details?.email || session.customer_email || '').toLowerCase();\nconst name = session.customer_details?.name || '';\nconst amount_cents = session.amount_total || 0;\nconst session_id = session.id || '';\nconst payment_link_id = session.payment_link || '';\nif (!email) return [];\nreturn [{json:{email, name, amount_cents, amount_euros: amount_cents/100, session_id, payment_link_id}}];"
+      }
+    },
+    {
+      "id": "wf07-map-003",
+      "name": "Code Map Product",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst map = {\n  9700:  {name:'Templates Pack', next_action:'send_templates'},\n  14700: {name:'Automation Audit', next_action:'send_calendly'},\n  19700: {name:'Monthly Maintenance', next_action:'send_onboarding'},\n  29700: {name:'n8n Autonomy Training', next_action:'send_training'},\n  49700: {name:'Starter Pack', next_action:'send_onboarding'},\n  79700: {name:'Growth Retainer', next_action:'send_onboarding_priority'},\n  149700:{name:'Scale Pack', next_action:'send_onboarding'}\n};\nconst p = map[item.amount_cents] || {name:'Unknown Product', next_action:'manual_review'};\nreturn [{json:{...item, product_name:p.name, next_action:p.next_action}}];"
+      }
+    },
+    {
+      "id": "wf07-pg-004",
+      "name": "Postgres Save Client",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO clients (email, name, product_name, amount_euros, stripe_session_id, next_action) VALUES ('{{ $json.email }}', '{{ $json.name }}', '{{ $json.product_name }}', {{ $json.amount_euros }}, '{{ $json.session_id }}', '{{ $json.next_action }}') ON CONFLICT (stripe_session_id) DO NOTHING",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "wf07-email-005",
+      "name": "Code Email Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst firstName = (item.name || '').split(' ')[0] || 'there';\nconst emails = {\n  send_calendly:{subject:'Your Automation Audit is booked',body:'Hi '+firstName+', thank you!'},\n  send_templates:{subject:'Your Templates Pack is ready',body:'Hi '+firstName+', your workflows are ready.'},\n  send_onboarding:{subject:'Welcome aboard - '+item.product_name,body:'Hi '+firstName+', thank you for choosing '+item.product_name+'!'}\n};\nconst e = emails[item.next_action] || {subject:'Thank you',body:'Hi '+firstName+', thank you for your purchase.'};\nreturn [{json:{...item, email_subject: e.subject, email_body: e.body}}];"
+      }
+    },
+    {
+      "id": "wf07-gmail-006",
+      "name": "Gmail Welcome",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1440,
+        300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.email_subject }}",
+        "emailType": "text",
+        "message": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail OAuth2 API"
+        }
+      },
+      "webhookId": "63618516-66d7-4da0-b7d4-8b8978296346"
+    },
+    {
+      "id": "wf07-tg-007",
+      "name": "Telegram New Client",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        300
+      ],
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=💳 New client: {{ $json.email }} — {{ $json.product_name }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_BOT_CREDENTIAL_ID",
+          "name": "t.me/kwcebot"
+        }
+      },
+      "webhookId": "b8f3856f-97ce-4e77-9b16-b13a1769d8b5"
+    }
+  ],
+  "connections": {
+    "Stripe Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code Parse Stripe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Parse Stripe": {
+      "main": [
+        [
+          {
+            "node": "Code Map Product",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Map Product": {
+      "main": [
+        [
+          {
+            "node": "Postgres Save Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Save Client": {
+      "main": [
+        [
+          {
+            "node": "Code Email Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Email Body": {
+      "main": [
+        [
+          {
+            "node": "Gmail Welcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Welcome": {
+      "main": [
+        [
+          {
+            "node": "Telegram New Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "8mwtMCWk0T2g0mSw"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "3e918e43-1ee0-42f1-a971-477ce85d4f92",
+  "triggerCount": 1,
+  "tags": []
+}

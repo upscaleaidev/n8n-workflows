@@ -1,0 +1,1933 @@
+{
+  "updatedAt": "2026-04-20T09:32:59.059Z",
+  "createdAt": "2026-04-17T13:17:20.057Z",
+  "id": "TSvhSSKCWziOGdak",
+  "name": "01b - Crypto Digest",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        160
+      ],
+      "id": "519d7788-26bb-44be-a5d2-cb15289cd290",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1312,
+        -192
+      ],
+      "id": "9452da51-c01c-4c9a-b161-cdc7f8c69e17",
+      "name": "Merge 3"
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        -128
+      ],
+      "id": "16819b6c-9d8f-4114-9b7e-68c092b87bf1",
+      "name": "Merge 1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        256
+      ],
+      "id": "df6a346a-2fc3-471d-84e3-e7bba45dacab",
+      "name": "Merge 2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "af94450b-75bc-4a10-8418-26b897919326",
+              "leftValue": "={{ $json.pubDate || $json.isoDate || $json.published || $json.created }}",
+              "rightValue": "={{ $now.minus({ hours: 24 }).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1312,
+        288
+      ],
+      "id": "85fdb158-a089-4770-ac2e-22cde5b310b0",
+      "name": "Filter (< 24h)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const seen = new Set();\nconst seenTitles = new Set();\nconst out = [];\n\nfor (const item of $input.all()) {\n  const url = item.json.link || item.json.url || item.json.guid || item.json.id;\n  \n  const rawTitle = item.json.title || '';\n  const normalizedTitle = rawTitle\n    .toLowerCase()\n    .replace(/[^\\w\\s]/g, '')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .substring(0, 60);\n  \n  if (seen.has(url) || seenTitles.has(normalizedTitle)) continue;\n  \n  seen.add(url);\n  seenTitles.add(normalizedTitle);\n  out.push(item);\n}\n\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        48
+      ],
+      "id": "41c77917-f70e-4603-a87d-07543c4b6d36",
+      "name": "Code in JavaScript (Dedup)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu es l'agent de veille crypto d'Upscale. Tu reçois des articles bruts RSS crypto/DeFi des dernières 24h.\n\nRègles :\n- Si un événement majeur (hack >10M$, listing majeur Binance/Coinbase, décision SEC/CFTC, fork réseau), commence par : 🚨 BREAKING\n- Max 8 items, classés par importance décroissante\n- Regroupe par catégorie avec emoji + gras\n- Pour chaque item : titre court (max 12 mots), résumé en 2 phrases MAX, lien\n- Ignore : shitcoins sans volume, \"Bitcoin reaches $X\" noise quotidien, partenariats vagues, airdrops sans intérêt\n- Si vraiment rien de pertinent : \"RAS aujourd'hui.\" et stop\n- Pas de préambule, pas de conclusion\n\nFormat HTML obligatoire :\n<b>🚨 BREAKING</b> (si applicable)\n<b>🪙 Bitcoin & Ethereum</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🔗 DeFi & Bridges</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🏛 Regulation</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>📊 On-Chain & Data</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\nRÉPONDS EXACTEMENT COMME CET EXEMPLE (commence par la catégorie, pas par un item) :\n\n<b>🪙 Bitcoin & Ethereum</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\n<b>🔗 DeFi & Bridges</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\nMAINTENANT APPLIQUE CE FORMAT À CES ARTICLES :\n{{ $json.articles_text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1712,
+        96
+      ],
+      "id": "81951412-6725-422a-b3c2-19088df97bfa",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.clean_text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        96
+      ],
+      "id": "47cdb6dc-351a-4a83-9bbe-57f1b398f5e3",
+      "name": "Send a text message",
+      "webhookId": "718aae0f-536e-4cba-b2e2-4b075d66d7c3",
+      "credentials": {
+        "telegramApi": {
+          "id": "p14tWUYWRrrK1wdv",
+          "name": "t.me/kwce_crypto_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $input.first().json.output || $input.first().json.message?.content || $input.first().json.text || '';\n\ntext = text.replace(/^([\\s\\S]*?)(?=\\n[•🚨<])/, '');\ntext = text.replace(/\\n*(Let me know|Would you like|This message was|Feel free).*$/si, '');\n\ntext = text.replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>');\ntext = text.replace(/\\*(.*?)\\*/g, '<i>$1</i>');\ntext = text.replace(/\\[(.*?)\\]\\((https?:\\/\\/.*?)\\)/g, '<a href=\"$2\">$1</a>');\n\ntext = text.replace(/<(\\/?b)>/gi, '%%B$1B%%');\ntext = text.replace(/<(\\/?i)>/gi, '%%I$1I%%');\ntext = text.replace(/<a href=\"(.*?)\">(.*?)<\\/a>/gi, '%%A$1A$2AA%%');\ntext = text.replace(/[<>]/g, '');\ntext = text.replace(/%%B(\\/?b)B%%/gi, '<$1>');\ntext = text.replace(/%%I(\\/?i)I%%/gi, '<$1>');\ntext = text.replace(/%%A(.*?)A(.*?)AA%%/g, '<a href=\"$1\">$2</a>');\ntext = text.replace(/\\[(.*?)\\]/g, '$1');\n\ntext = text.trimStart();\nif (!text.startsWith('<b>')) text = '<b>🪙 Bitcoin & Ethereum</b>\\n' + text;\n\nif (text.length > 4000) {\n  text = text.substring(0, 3950) + '\\n\\n... (tronqué)';\n}\n\nreturn [{ json: { clean_text: `🪙 <b><a href=\"https://linktr.ee/kwce\">kwce</a> CRYPTO DIGEST</b>\\n\\n${text}\\n\\n━━━━━━━━━━━━━━━\\nPropulsé par <a href=\"https://linktr.ee/kwce\">kwce</a>` } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        96
+      ],
+      "id": "7642dcdd-de38-4db8-a34f-b5672095042a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const articles = $input.all().slice(0, 30).map(item => {\n  const title = item.json.title || 'Sans titre';\n  const link = item.json.link || item.json.url || '';\n  const desc = (item.json.contentSnippet || item.json.description || '').substring(0, 250);\n  return `- ${title}\\n  ${desc}\\n  ${link}`;\n}).join('\\n\\n');\n\nreturn [{ json: { articles_text: articles } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        528
+      ],
+      "id": "9f2c16f6-03d8-455f-a382-e53e65c34099",
+      "name": "Code in JavaScript (Fusion)"
+    },
+    {
+      "parameters": {
+        "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -128
+      ],
+      "id": "2651b186-de47-4e53-aa9f-fba01d3f7bbb",
+      "name": "CoinDesk",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://cointelegraph.com/rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        -128
+      ],
+      "id": "1fcf5d17-94db-4ba6-9380-b964f1af924e",
+      "name": "CoinTelegraph",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://decrypt.co/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        -128
+      ],
+      "id": "ef3c470b-1ae7-437e-b1b9-b12d307cc43d",
+      "name": "Decrypt",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://insights.glassnode.com/rss/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        -128
+      ],
+      "id": "41c033f1-01f8-4af5-8f0d-47d093a99a76",
+      "name": "Glassnode",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://bankless.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        256
+      ],
+      "id": "0bd591b8-a2c5-48cb-a284-7f65177686b3",
+      "name": "Bankless",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://cryptoslate.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        448
+      ],
+      "id": "8d843c9a-0399-4a9e-8272-b1d9dd5202db",
+      "name": "CryptoSlate",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://ambcrypto.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        256
+      ],
+      "id": "4b4fbef9-b356-409c-b575-c49bc4c01ae5",
+      "name": "AMBCrypto",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://beincrypto.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        448
+      ],
+      "id": "d8166fb0-28ea-4668-93c5-7c2360b46001",
+      "name": "BeInCrypto",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://cryptobriefing.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        448
+      ],
+      "id": "b809a200-e977-42bb-8872-eeafbfa4e993",
+      "name": "Crypto Briefing",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://bankless.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        64
+      ],
+      "id": "f582ded9-bc6e-499b-901a-ca71edf24b25",
+      "name": "Bankless1",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://bitcoinist.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        64
+      ],
+      "id": "afa68ddb-7250-475a-8c41-5f31a3745a80",
+      "name": "Bitcoinist",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.newsbtc.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        64
+      ],
+      "id": "fb01345f-ca8a-4fe6-99e6-de914a77163f",
+      "name": "NewsBTC",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://thedefiant.io/rss/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        64
+      ],
+      "id": "ca46fc2b-44ce-4edc-9591-eccd8a44cb33",
+      "name": "The Defiant",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://protos.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        256
+      ],
+      "id": "60ee997a-8de3-45c0-910a-7a56bf62886d",
+      "name": "Protos",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://dune.com/blog/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        448
+      ],
+      "id": "dcc9a099-660d-438f-8e0f-c12a1ea11cd4",
+      "name": "Dune Blog",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama-3.3-70b-versatile",
+          "mode": "list",
+          "cachedResultName": "llama-3.3-70b-versatile"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        304
+      ],
+      "id": "682912fc-bca7-4d18-a386-0a735bf6a694",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_GROQ_OPENAI_COMPAT_CREDENTIAL_ID",
+          "name": "groq api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://blockworks.co/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        256
+      ],
+      "id": "db50bfe8-2ef3-4315-ad82-580e1f6de8fe",
+      "name": "Blockworks",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=⚠️ Source RSS down : {{ $json.error.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -320
+      ],
+      "id": "66f7b26e-0995-4d11-bec5-e2effc7e7904",
+      "name": "Send a text message1",
+      "webhookId": "f15e77bd-3cec-4334-a241-8aa25fa7aaee",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_DEBUG_BOT_CREDENTIAL_ID",
+          "name": "t.me/kwcedebugbot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Crypto Briefing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CryptoSlate",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Dune Blog",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "BeInCrypto",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Blockworks",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bankless",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Protos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AMBCrypto",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CoinDesk",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CoinTelegraph",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Glassnode",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Decrypt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "The Defiant",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NewsBTC",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bitcoinist",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bankless1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge 1": {
+      "main": [
+        [
+          {
+            "node": "Merge 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge 2": {
+      "main": [
+        [
+          {
+            "node": "Merge 3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge 3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (Dedup)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript (Dedup)": {
+      "main": [
+        [
+          {
+            "node": "Filter (< 24h)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter (< 24h)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (Fusion)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript (Fusion)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CoinDesk": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CoinTelegraph": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decrypt": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Glassnode": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bankless": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CryptoSlate": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 6
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AMBCrypto": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BeInCrypto": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 4
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto Briefing": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 7
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bankless1": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 4
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bitcoinist": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 5
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NewsBTC": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 6
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "The Defiant": {
+      "main": [
+        [
+          {
+            "node": "Merge 1",
+            "type": "main",
+            "index": 7
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Protos": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dune Blog": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 5
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blockworks": {
+      "main": [
+        [
+          {
+            "node": "Merge 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "8mwtMCWk0T2g0mSw",
+    "callerPolicy": "workflowsFromSameOwner",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "12771c52-2af5-477d-a310-98cc4a8958db",
+  "activeVersionId": "12771c52-2af5-477d-a310-98cc4a8958db",
+  "triggerCount": 1,
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-04-19T14:06:05.511Z",
+    "createdAt": "2026-04-19T14:06:05.511Z",
+    "versionId": "12771c52-2af5-477d-a310-98cc4a8958db",
+    "workflowId": "TSvhSSKCWziOGdak",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 5
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          32,
+          160
+        ],
+        "id": "519d7788-26bb-44be-a5d2-cb15289cd290",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1312,
+          -192
+        ],
+        "id": "9452da51-c01c-4c9a-b161-cdc7f8c69e17",
+        "name": "Merge 3"
+      },
+      {
+        "parameters": {
+          "numberInputs": 8
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1072,
+          -128
+        ],
+        "id": "16819b6c-9d8f-4114-9b7e-68c092b87bf1",
+        "name": "Merge 1"
+      },
+      {
+        "parameters": {
+          "numberInputs": 8
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1072,
+          256
+        ],
+        "id": "df6a346a-2fc3-471d-84e3-e7bba45dacab",
+        "name": "Merge 2"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "af94450b-75bc-4a10-8418-26b897919326",
+                "leftValue": "={{ $json.pubDate || $json.isoDate || $json.published || $json.created }}",
+                "rightValue": "={{ $now.minus({ hours: 24 }).toISO() }}",
+                "operator": {
+                  "type": "dateTime",
+                  "operation": "after"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          1312,
+          288
+        ],
+        "id": "85fdb158-a089-4770-ac2e-22cde5b310b0",
+        "name": "Filter (< 24h)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const seen = new Set();\nconst seenTitles = new Set();\nconst out = [];\n\nfor (const item of $input.all()) {\n  const url = item.json.link || item.json.url || item.json.guid || item.json.id;\n  \n  const rawTitle = item.json.title || '';\n  const normalizedTitle = rawTitle\n    .toLowerCase()\n    .replace(/[^\\w\\s]/g, '')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .substring(0, 60);\n  \n  if (seen.has(url) || seenTitles.has(normalizedTitle)) continue;\n  \n  seen.add(url);\n  seenTitles.add(normalizedTitle);\n  out.push(item);\n}\n\nreturn out;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1312,
+          48
+        ],
+        "id": "41c77917-f70e-4603-a87d-07543c4b6d36",
+        "name": "Code in JavaScript (Dedup)"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Tu es l'agent de veille crypto d'Upscale. Tu reçois des articles bruts RSS crypto/DeFi des dernières 24h.\n\nRègles :\n- Si un événement majeur (hack >10M$, listing majeur Binance/Coinbase, décision SEC/CFTC, fork réseau), commence par : 🚨 BREAKING\n- Max 8 items, classés par importance décroissante\n- Regroupe par catégorie avec emoji + gras\n- Pour chaque item : titre court (max 12 mots), résumé en 2 phrases MAX, lien\n- Ignore : shitcoins sans volume, \"Bitcoin reaches $X\" noise quotidien, partenariats vagues, airdrops sans intérêt\n- Si vraiment rien de pertinent : \"RAS aujourd'hui.\" et stop\n- Pas de préambule, pas de conclusion\n\nFormat HTML obligatoire :\n<b>🚨 BREAKING</b> (si applicable)\n<b>🪙 Bitcoin & Ethereum</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🔗 DeFi & Bridges</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>🏛 Regulation</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\n<b>📊 On-Chain & Data</b>\n• <b>Titre</b> - Résumé. <a href=\"URL\">Lire</a>\n\nRÉPONDS EXACTEMENT COMME CET EXEMPLE (commence par la catégorie, pas par un item) :\n\n<b>🪙 Bitcoin & Ethereum</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\n<b>🔗 DeFi & Bridges</b>\n• <b>Titre ici</b> - Résumé ici. <a href=\"https://url.com\">Lire</a>\n\nMAINTENANT APPLIQUE CE FORMAT À CES ARTICLES :\n{{ $json.articles_text }}",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1712,
+          96
+        ],
+        "id": "81951412-6725-422a-b3c2-19088df97bfa",
+        "name": "AI Agent",
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 5000,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "={{ $json.clean_text }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          2256,
+          96
+        ],
+        "id": "47cdb6dc-351a-4a83-9bbe-57f1b398f5e3",
+        "name": "Send a text message",
+        "webhookId": "718aae0f-536e-4cba-b2e2-4b075d66d7c3",
+        "credentials": {
+          "telegramApi": {
+            "id": "p14tWUYWRrrK1wdv",
+            "name": "t.me/kwce_crypto_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "let text = $input.first().json.output || $input.first().json.message?.content || $input.first().json.text || '';\n\ntext = text.replace(/^([\\s\\S]*?)(?=\\n[•🚨<])/, '');\ntext = text.replace(/\\n*(Let me know|Would you like|This message was|Feel free).*$/si, '');\n\ntext = text.replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>');\ntext = text.replace(/\\*(.*?)\\*/g, '<i>$1</i>');\ntext = text.replace(/\\[(.*?)\\]\\((https?:\\/\\/.*?)\\)/g, '<a href=\"$2\">$1</a>');\n\ntext = text.replace(/<(\\/?b)>/gi, '%%B$1B%%');\ntext = text.replace(/<(\\/?i)>/gi, '%%I$1I%%');\ntext = text.replace(/<a href=\"(.*?)\">(.*?)<\\/a>/gi, '%%A$1A$2AA%%');\ntext = text.replace(/[<>]/g, '');\ntext = text.replace(/%%B(\\/?b)B%%/gi, '<$1>');\ntext = text.replace(/%%I(\\/?i)I%%/gi, '<$1>');\ntext = text.replace(/%%A(.*?)A(.*?)AA%%/g, '<a href=\"$1\">$2</a>');\ntext = text.replace(/\\[(.*?)\\]/g, '$1');\n\ntext = text.trimStart();\nif (!text.startsWith('<b>')) text = '<b>🪙 Bitcoin & Ethereum</b>\\n' + text;\n\nif (text.length > 4000) {\n  text = text.substring(0, 3950) + '\\n\\n... (tronqué)';\n}\n\nreturn [{ json: { clean_text: `🪙 <b><a href=\"https://linktr.ee/kwce\">kwce</a> CRYPTO DIGEST</b>\\n\\n${text}\\n\\n━━━━━━━━━━━━━━━\\nPropulsé par <a href=\"https://linktr.ee/kwce\">kwce</a>` } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2064,
+          96
+        ],
+        "id": "7642dcdd-de38-4db8-a34f-b5672095042a",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "jsCode": "const articles = $input.all().slice(0, 30).map(item => {\n  const title = item.json.title || 'Sans titre';\n  const link = item.json.link || item.json.url || '';\n  const desc = (item.json.contentSnippet || item.json.description || '').substring(0, 250);\n  return `- ${title}\\n  ${desc}\\n  ${link}`;\n}).join('\\n\\n');\n\nreturn [{ json: { articles_text: articles } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1312,
+          528
+        ],
+        "id": "9f2c16f6-03d8-455f-a382-e53e65c34099",
+        "name": "Code in JavaScript (Fusion)"
+      },
+      {
+        "parameters": {
+          "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          -128
+        ],
+        "id": "2651b186-de47-4e53-aa9f-fba01d3f7bbb",
+        "name": "CoinDesk",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://cointelegraph.com/rss",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          -128
+        ],
+        "id": "1fcf5d17-94db-4ba6-9380-b964f1af924e",
+        "name": "CoinTelegraph",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://decrypt.co/feed",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          -128
+        ],
+        "id": "ef3c470b-1ae7-437e-b1b9-b12d307cc43d",
+        "name": "Decrypt",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://insights.glassnode.com/rss/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          -128
+        ],
+        "id": "41c033f1-01f8-4af5-8f0d-47d093a99a76",
+        "name": "Glassnode",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://bankless.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          256
+        ],
+        "id": "0bd591b8-a2c5-48cb-a284-7f65177686b3",
+        "name": "Bankless",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://cryptoslate.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          448
+        ],
+        "id": "8d843c9a-0399-4a9e-8272-b1d9dd5202db",
+        "name": "CryptoSlate",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://ambcrypto.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          256
+        ],
+        "id": "4b4fbef9-b356-409c-b575-c49bc4c01ae5",
+        "name": "AMBCrypto",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://beincrypto.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          448
+        ],
+        "id": "d8166fb0-28ea-4668-93c5-7c2360b46001",
+        "name": "BeInCrypto",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://cryptobriefing.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          448
+        ],
+        "id": "b809a200-e977-42bb-8872-eeafbfa4e993",
+        "name": "Crypto Briefing",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://bankless.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          64
+        ],
+        "id": "f582ded9-bc6e-499b-901a-ca71edf24b25",
+        "name": "Bankless1",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://bitcoinist.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          64
+        ],
+        "id": "afa68ddb-7250-475a-8c41-5f31a3745a80",
+        "name": "Bitcoinist",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://www.newsbtc.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          608,
+          64
+        ],
+        "id": "fb01345f-ca8a-4fe6-99e6-de914a77163f",
+        "name": "NewsBTC",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://thedefiant.io/rss/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          64
+        ],
+        "id": "ca46fc2b-44ce-4edc-9591-eccd8a44cb33",
+        "name": "The Defiant",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://protos.com/feed/",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          256
+        ],
+        "id": "60ee997a-8de3-45c0-910a-7a56bf62886d",
+        "name": "Protos",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "https://dune.com/blog/feed",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          448
+        ],
+        "id": "dcc9a099-660d-438f-8e0f-c12a1ea11cd4",
+        "name": "Dune Blog",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "llama-3.3-70b-versatile",
+            "mode": "list",
+            "cachedResultName": "llama-3.3-70b-versatile"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1712,
+          304
+        ],
+        "id": "682912fc-bca7-4d18-a386-0a735bf6a694",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_GROQ_OPENAI_COMPAT_CREDENTIAL_ID",
+            "name": "groq api"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "url": "https://blockworks.co/feed",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.2,
+        "position": [
+          800,
+          256
+        ],
+        "id": "db50bfe8-2ef3-4315-ad82-580e1f6de8fe",
+        "name": "Blockworks",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "=⚠️ Source RSS down : {{ $json.error.message }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          -320
+        ],
+        "id": "66f7b26e-0995-4d11-bec5-e2effc7e7904",
+        "name": "Send a text message1",
+        "webhookId": "f15e77bd-3cec-4334-a241-8aa25fa7aaee",
+        "credentials": {
+          "telegramApi": {
+            "id": "YOUR_TELEGRAM_DEBUG_BOT_CREDENTIAL_ID",
+            "name": "t.me/kwcedebugbot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Crypto Briefing",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "CryptoSlate",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Dune Blog",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "BeInCrypto",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Blockworks",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Bankless",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Protos",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "AMBCrypto",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "CoinDesk",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "CoinTelegraph",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Glassnode",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Decrypt",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "The Defiant",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "NewsBTC",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Bitcoinist",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Bankless1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge 1": {
+        "main": [
+          [
+            {
+              "node": "Merge 3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge 2": {
+        "main": [
+          [
+            {
+              "node": "Merge 3",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge 3": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript (Dedup)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript (Dedup)": {
+        "main": [
+          [
+            {
+              "node": "Filter (< 24h)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter (< 24h)": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript (Fusion)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript (Fusion)": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "CoinDesk": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 3
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "CoinTelegraph": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 2
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Decrypt": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 1
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Glassnode": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Bankless": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 1
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "CryptoSlate": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 6
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AMBCrypto": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 3
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "BeInCrypto": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 4
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Crypto Briefing": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 7
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Bankless1": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 4
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Bitcoinist": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 5
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NewsBTC": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 6
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "The Defiant": {
+        "main": [
+          [
+            {
+              "node": "Merge 1",
+              "type": "main",
+              "index": 7
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Protos": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 2
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dune Blog": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 5
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Blockworks": {
+        "main": [
+          [
+            {
+              "node": "Merge 2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": null,
+    "description": null,
+    "autosaved": false
+  }
+}
