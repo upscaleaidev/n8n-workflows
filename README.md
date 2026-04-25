@@ -6,8 +6,8 @@ Public export of my personal n8n automation stack. All credential IDs, chat IDs,
 
 ```
                     ┌──────────────────────────────────┐
-                    │  00 - Error Workflow              │
-                    │  (global error handler)           │
+                    │  00 - Error Workflow             │
+                    │  (global error handler)          │
                     └──────────────┬───────────────────┘
                                    │ errorWorkflow
          ┌─────────────────────────┼──────────────────────────────────┐
