@@ -10,8 +10,8 @@ Public export of my personal n8n automation stack. All credential IDs, chat IDs,
                     │  (global error handler)          │
                     └──────────────┬───────────────────┘
                                    │ errorWorkflow
-         ┌─────────────────────────┼──────────────────────────────────┐
-         │                         │                                  │
+         ┌─────────────────────────┼─────────────────────────────────┐
+         │                         │                                 │
 ┌────────▼──────────┐   ┌─────────▼───────────┐   ┌──────────────────▼────┐
 │  01a Tech Digest  │   │  02 Email Triage    │   │  07 Stripe Onboarding │
 │  01b Crypto       │   │  03 Email Digest    │   └───────────────────────┘
