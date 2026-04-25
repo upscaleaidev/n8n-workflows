@@ -12,7 +12,7 @@ Public export of my personal n8n automation stack. All credential IDs, chat IDs,
                                    │ errorWorkflow
          ┌─────────────────────────┼──────────────────────────────────┐
          │                         │                                  │
-┌────────▼──────────┐   ┌─────────▼──────────┐   ┌──────────────────▼────┐
+┌────────▼──────────┐   ┌─────────▼───────────┐   ┌──────────────────▼────┐
 │  01a Tech Digest  │   │  02 Email Triage    │   │  07 Stripe Onboarding │
 │  01b Crypto       │   │  03 Email Digest    │   └───────────────────────┘
 │  01c Finance      │   │                     │
@@ -20,9 +20,9 @@ Public export of my personal n8n automation stack. All credential IDs, chat IDs,
 └───────────────────┘   │  05b Prospect Agent │   │  04 Self Monitoring   │
                         │  06 Veille          │   └───────────────────────┘
                         └─────────────────────┘
-                                                   ┌───────────────────────┐
-                                                   │  08 AI Error Agent    │
-                                                   └───────────────────────┘
+                                                  ┌───────────────────────┐
+                                                  │  08 AI Error Agent    │
+                                                  └───────────────────────┘
 ```
 
 ## Workflows
